@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
 
+from UI.registry import PAGES
+
 class Auction(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -11,13 +13,13 @@ class Auction(tk.Tk):
 
         self.frames = {}
 
-        for PageClass in (HomePage, CreateDonorPage):
+        for PageClass in PAGES:
             page = PageClass(container, self)
-            self.frames[PageClass] = page
+            self.frames[PageClass.__name__] = page
             page.grid(row = 0, column = 0, sticky = "nsew")
 
-        self.showFrame(StartPage)
+        self.showFrame("HomePage")
 
-    def showFrame(self, pageClass):
-        frame = self.frames[pageClass]
+    def showFrame(self, pageName):
+        frame = self.frames[pageName]
         frame.tkraise()
