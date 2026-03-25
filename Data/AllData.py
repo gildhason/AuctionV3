@@ -1,21 +1,21 @@
-from Data.donor import Donor
+from Data.Donor import Donor
 
 class AllData:
-    def __init__():
-        self.donors = readDonors()
-        self.items  = readItems()
-        self.buyers = readBuyers()
+    def __init__(self):
+        self.donors = self.readDonors()
+        self.items  = self.readItems()
+        self.buyers = self.readBuyers()
         
     # TODO: Write function for reading list of donors
-    def readDonors():
+    def readDonors(self):
         pass
 
     # TODO: Write function for reading list of items
-    def readItems():
+    def readItems(self):
         pass
 
     # TODO: Write function for reading list of buyers
-    def readBuyers():
+    def readBuyers(self):
         pass
 
     # TODO: Write function for adding a donor
