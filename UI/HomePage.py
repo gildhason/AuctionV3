@@ -12,7 +12,7 @@ class HomePage(tk.Frame):
         # !! TODO: Implement donor page
         donorsButton = ttk.Button(self, text="Donors", command=lambda: parent.master.showFrame("DonorsPage"))
         # TODO: Implement item page
-        itemsButton = ttk.Button(self, text="Items", command=lambda: parent.master.showFrame("UnfinishedPage"))
+        itemsButton = ttk.Button(self, text="Items", command=lambda: parent.master.showFrame("ItemsPage"))
         # TODO: Implement bidder page
         biddersButton = ttk.Button(self, text="Bidders", command=lambda: parent.master.showFrame("UnfinishedPage"))
         # TODO: Implement receipt page
