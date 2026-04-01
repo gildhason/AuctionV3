@@ -7,27 +7,27 @@ class DonorsPage(tk.Frame):
         self.controller = controller
         self.nav = nav
 
-        treeviewColumns = ("ID", "Name", "Address", "Items")
+        treeview_columns = ("ID", "Name", "Address", "Items")
 
         # Create a label
         label = ttk.Label(self, text="Donors", font=("Arial", 16))
         # TODO: Add add donor page
-        addButton = ttk.Button(self, text="Add Donor", command=lambda: parent.master.showFrame("UnfinishedPage"))
+        add_button = ttk.Button(self, text="Add Donor", command=lambda: parent.master.show_frame("UnfinishedPage"))
         # TODO: Add edit donor page
-        editButton = ttk.Button(self, text="Edit Donor", command=lambda: parent.master.showFrame("UnfinishedPage"))
+        edit_button = ttk.Button(self, text="Edit Donor", command=lambda: parent.master.show_frame("UnfinishedPage"))
         # TODO: Add delete donor page
-        deleteButton = ttk.Button(self, text="Delete Donor", command=lambda: parent.master.showFrame("UnfinishedPage"))
-        backButton = ttk.Button(self, text="Back to Home", command=lambda: parent.master.goBack())
-        donorTreeview = ttk.Treeview(self, columns=treeviewColumns, show="headings")
+        delete_button = ttk.Button(self, text="Delete Donor", command=lambda: parent.master.show_frame("UnfinishedPage"))
+        back_button = ttk.Button(self, text="Back to Home", command=lambda: parent.master.go_back())
+        donor_treeview = ttk.Treeview(self, columns=treeview_columns, show="headings")
 
-        donorTreeview.heading("ID", text="ID")
-        donorTreeview.column("ID", width=50, anchor="center")
-        donorTreeview.heading("Name", text="Name")
-        donorTreeview.column("Name", width=100, anchor="center")
-        donorTreeview.heading("Address", text="Address")
-        donorTreeview.column("Address", width=150, anchor="center")
-        donorTreeview.heading("Items", text="Items Donated")
-        donorTreeview.column("Items", width=100, anchor="center")
+        donor_treeview.heading("ID", text="ID")
+        donor_treeview.column("ID", width=50, anchor="center")
+        donor_treeview.heading("Name", text="Name")
+        donor_treeview.column("Name", width=100, anchor="center")
+        donor_treeview.heading("Address", text="Address")
+        donor_treeview.column("Address", width=150, anchor="center")
+        donor_treeview.heading("Items", text="Items Donated")
+        donor_treeview.column("Items", width=100, anchor="center")
 
         self.grid_rowconfigure(0, weight=2)
         self.grid_rowconfigure(1, weight=1)
@@ -38,12 +38,12 @@ class DonorsPage(tk.Frame):
         self.grid_columnconfigure(1, weight=4)
 
         label.grid(row=0, column=0, columnspan=2, padx=10, pady=10)
-        addButton.grid(row=1, column=0, padx=10, pady=10, sticky="ew")
-        editButton.grid(row=2, column=0, padx=10, pady=10, sticky="ew")
-        deleteButton.grid(row=3, column=0, padx=10, pady=10, sticky="ew")
-        backButton.grid(row=4, column=0, padx=10, pady=10, sticky="ew")
-        donorTreeview.grid(row=1, column=1, rowspan=4, padx=10, pady=10, sticky="nsew")
+        add_button.grid(row=1, column=0, padx=10, pady=10, sticky="ew")
+        edit_button.grid(row=2, column=0, padx=10, pady=10, sticky="ew")
+        delete_button.grid(row=3, column=0, padx=10, pady=10, sticky="ew")
+        back_button.grid(row=4, column=0, padx=10, pady=10, sticky="ew")
+        donor_treeview.grid(row=1, column=1, rowspan=4, padx=10, pady=10, sticky="nsew")
 
     # TODO: Write function to update the treeview
-    def updateDonors(self):
+    def update_donors(self):
         pass

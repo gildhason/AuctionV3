@@ -4,5 +4,5 @@ from UI.Auction import Auction
 from Data.AllData import AllData
 
 if __name__ == "__main__":
-    allData = AllData()
+    all_data = AllData()
     Auction().mainloop()

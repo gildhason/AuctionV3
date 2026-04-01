@@ -36,14 +36,14 @@ class Auction(tk.Tk):
             self.frames[PageClass.__name__] = page
             page.grid(row = 0, column = 0, sticky = "nsew")
 
-        self.showFrame("HomePage")
+        self.show_frame("HomePage")
 
-    def showFrame(self, destPageName):
+    def show_frame(self, destPageName):
         self.nav.navigate(destPageName)
         frame = self.frames[destPageName]
         frame.tkraise()
 
-    def goBack(self):
+    def go_back(self):
         prev = self.nav.back()
         self.nav.current = prev
         self.frames[prev].tkraise()

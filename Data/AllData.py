@@ -2,27 +2,27 @@ from Data.Donor import Donor
 
 class AllData:
     def __init__(self):
-        self.donors = self.readDonors()
-        self.items  = self.readItems()
-        self.buyers = self.readBuyers()
+        self.donors = self.read_donors()
+        self.items  = self.read_items()
+        self.buyers = self.read_buyers()
 
-        self.nextDonorID = 1
-        self.nextItemID = 1
-        self.nextBuyerID = 1
-        
+        self.next_donor_id = 1
+        self.next_item_id = 1
+        self.next_buyer_id = 1
+
     # TODO: Write function for reading list of donors and update nextDonorID
-    def readDonors(self):
+    def read_donors(self):
         pass
 
     # TODO: Write function for reading list of items and update nextItemID
-    def readItems(self):
+    def read_items(self):
         pass
 
     # TODO: Write function for reading list of buyers and update nextBuyerID
-    def readBuyers(self):
+    def read_buyers(self):
         pass
 
     # TODO: Write function for adding a donor
-    def addDonor(self, nameIn, addressIn, itemsIn):
+    def add_donor(self, nameIn, addressIn, itemsIn):
         self.donors
         pass
