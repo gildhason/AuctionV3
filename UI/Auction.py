@@ -20,10 +20,11 @@ class NavigationManager:
         return self.current
 
 class Auction(tk.Tk):
-    def __init__(self):
+    def __init__(self, all_data):
         super().__init__()
         self.title("App")
         self.nav = NavigationManager()
+        self.all_data = all_data
 
         container = ttk.Frame(self)
         container.pack(fill = "both", expand = True)
@@ -32,6 +33,7 @@ class Auction(tk.Tk):
         self.frameStack = []
 
         for PageClass in PAGES:
+            # TODO: Because I can access show_frame and go_back through controller, investigate whether the parent parameter is necessary
             page = PageClass(container, self, self.nav)
             self.frames[PageClass.__name__] = page
             page.grid(row = 0, column = 0, sticky = "nsew")

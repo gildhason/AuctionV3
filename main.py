@@ -5,4 +5,4 @@ from Data.AllData import AllData
 
 if __name__ == "__main__":
     all_data = AllData()
-    Auction().mainloop()
+    Auction(all_data).mainloop()
