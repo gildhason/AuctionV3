@@ -7,6 +7,9 @@ class Donor:
         self.address = address
         self.item_ids = [] # list of item IDs (strings)
 
+    def __str__(self):
+        return f"ID: {self.donor_id}, Name: {self.name}, Address: {self.address}"
+
     # TODO: Implement
     def add_item(self, item):
         self.items.append(item)

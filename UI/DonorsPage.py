@@ -10,12 +10,16 @@ class AddOrEdit(tk.Frame):
         mode_add = tk.Radiobutton(self, text="Add donor", variable=self.mode, value="ADD", command=self._notify_parents)
         mode_edit = tk.Radiobutton(self, text="Edit donor", variable=self.mode, value="EDIT", command=self._notify_parents)
 
+        self.mode.set("ADD")
+
         self.grid_rowconfigure(0)    
         self.grid_columnconfigure(0)
         self.grid_columnconfigure(1)
 
         mode_add.grid(row=0, column=0, padx=10, pady=10)
         mode_edit.grid(row=0, column=1, padx=10, pady=10)
+
+        self._notify_parents()
 
     def _notify_parents(self):
         if self.callback:
@@ -25,15 +29,18 @@ class ModDonorForm(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
+
+        self.name_var = tk.StringVar()
+        self.address_var = tk.StringVar()
+
         self.next_id = tk.StringVar()
         add_or_edit = AddOrEdit(self, controller, callback=self.on_mode_change)
         ID_label = ttk.Label(self, text="ID")
         name_label = ttk.Label(self, text="Name")
         address_label = ttk.Label(self, text="Address")
         ID_entry = tk.Entry(self, textvariable=self.next_id, state="readonly")
-        name_entry = ttk.Entry(self)
-        address_entry = ttk.Entry(self)
-        self.submit_button = ttk.Button(self, text="Submit")
+        name_entry = ttk.Entry(self, textvariable=self.name_var)
+        address_entry = ttk.Entry(self, textvariable=self.address_var)
 
         self.grid_rowconfigure(0)
         self.grid_rowconfigure(1)
@@ -51,17 +58,25 @@ class ModDonorForm(tk.Frame):
         name_entry.grid(row=1, column=3, padx=10, pady=10)
         address_label.grid(row=2, column=0, padx=10, pady=10)
         address_entry.grid(row=2, column=1, columnspan=3, sticky="ew", padx=10, pady=10)
-        self.submit_button.grid(row=3, column=0, columnspan=4, sticky="ew", padx=10, pady=10)
 
         self.next_id.set(self.controller.all_data.next_donor_id)
 
     def on_mode_change(self, modeIn):
+        self.mode = modeIn
         if modeIn == "ADD":
             self.next_id.set(self.controller.all_data.next_donor_id)
-            # TODO: Change submit button based on the mode
-            # self.submit_button
+            self.submit_button = ttk.Button(self, text="Add donor", command=self.commitAction)
+            self.submit_button.grid(row=3, column=0, columnspan=4, sticky="ew", padx=10, pady=10)
         elif modeIn == "EDIT":
             self.next_id.set("Unfinished")
+            self.submit_button = ttk.Button(self, text="Edit donor", command=self.commitAction)
+            self.submit_button.grid(row=3, column=0, columnspan=4, sticky="ew", padx=10, pady=10)
+
+    def commitAction(self):
+        if self.mode == "ADD":
+            self.controller.all_data.add_donor(self.name_var.get(), self.address_var.get())
+            for donor in self.controller.all_data.donors:
+                print(donor)
 
 class DonorsPage(tk.Frame):
     def __init__(self, parent, controller, nav):

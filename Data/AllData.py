@@ -2,7 +2,7 @@ from Data.Donor import Donor
 
 class AllData:
     def __init__(self):
-        self.donors = self.read_donors()
+        self.donors = []
         self.items  = self.read_items()
         self.buyers = self.read_buyers()
 
@@ -23,6 +23,7 @@ class AllData:
         pass
 
     # TODO: Write function for adding a donor
-    def add_donor(self, nameIn, addressIn, itemsIn):
-        self.donors
+    def add_donor(self, nameIn, addressIn):
+        self.donors.append(Donor(self.next_donor_id, nameIn, addressIn))
+        self.next_donor_id += 1
         pass
