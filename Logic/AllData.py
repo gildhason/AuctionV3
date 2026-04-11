@@ -1,22 +1,35 @@
+import json
+from os import listdir
+from os.path import isfile, join
+
 from Logic.Donor import Donor
 
 class AllData:
     def __init__(self):
-        self.donors = []
-        self.items  = self.read_items()
-        self.buyers = self.read_buyers()
-
         self.next_donor_id_num = 1
         self.next_item_id_num = 1
         self.next_buyer_id_num = 1
 
-        self.next_donor_id = f"D{self.next_donor_id_num}"
+        self.donors = self.read_donors()
+        self.items  = self.read_items()
+        self.buyers = self.read_buyers()
+
+        self.next_donor_id = f"D{self.next_donor_id_num:03}"
         self.next_item_id = f"D{self.next_item_id_num}"
         self.next_buyer_id = f"D{self.next_buyer_id_num}"
 
     # TODO: Write function for reading list of donors and update nextDonorID
     def read_donors(self):
-        pass
+        donor_list = [f for f in listdir("Data/Donors/") if isfile(join("Data/Donors/", f))]
+        donor_dict = {}
+        for file in donor_list:
+            with open(f"Data/Donors/{file}") as f:
+                donor_json = json.load(f)
+                donor_dict[donor_json["donor_id"]] = donor_json
+                if int(donor_json["donor_id"][1:]) >= self.next_donor_id_num:
+                    self.next_donor_id_num = int(donor_json["donor_id"][1:]) + 1
+                print(donor_dict)
+        return donor_dict
 
     # TODO: Write function for reading list of items and update nextItemID
     def read_items(self):
@@ -32,5 +45,5 @@ class AllData:
         self.donors.append(newDonor)
         newDonor.save_donor()
         self.next_donor_id_num += 1
-        self.next_donor_id = f"D{self.next_donor_id_num}"
+        self.next_donor_id = f"D{self.next_donor_id_num:03}"
         pass

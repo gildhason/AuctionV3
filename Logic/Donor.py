@@ -21,5 +21,5 @@ class Donor:
             "address": self.address,
             "items": self.item_ids
         }
-        with open(f"{self.donor_id}.json", "w") as f:
+        with open(f"Data/Donors/{self.donor_id}.json", "w") as f:
             json.dump(data, f)
