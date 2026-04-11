@@ -22,4 +22,4 @@ class Donor:
             "items": self.item_ids
         }
         with open(f"{self.donor_id}.json", "w") as f:
-            f.dump(data, f)
+            json.dump(data, f)

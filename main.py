@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from UI.Auction import Auction
-from Data.AllData import AllData
+from Logic.AllData import AllData
 
 if __name__ == "__main__":
     all_data = AllData()

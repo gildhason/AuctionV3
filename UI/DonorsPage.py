@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
 
+from Logic.Donor import Donor
+
 class AddOrEdit(tk.Frame):
     def __init__(self, parent, controller, callback=None):
         super().__init__(parent)
@@ -75,6 +77,7 @@ class ModDonorForm(tk.Frame):
     def commitAction(self):
         if self.mode == "ADD":
             self.controller.all_data.add_donor(self.name_var.get(), self.address_var.get())
+            self.next_id.set(self.controller.all_data.next_donor_id)
             for donor in self.controller.all_data.donors:
                 print(donor)
 
