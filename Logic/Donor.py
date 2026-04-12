@@ -1,14 +1,14 @@
 import json
 
 class Donor:
-    def __init__(self, donor_id, name, address):
-        self.donor_id = donor_id
+    def __init__(self, idIn, name, address):
+        self.id = idIn
         self.name = name
         self.address = address
         self.item_ids = [] # list of item IDs (strings)
 
     def __str__(self):
-        return f"ID: {self.donor_id}, Name: {self.name}, Address: {self.address}"
+        return f"ID: {self.id}, Name: {self.name}, Address: {self.address}"
 
     # TODO: Implement
     def add_item(self, item):
@@ -16,7 +16,7 @@ class Donor:
 
     def save_donor(self):
         data = {
-            "donor_id": self.donor_id,
+            "id": self.id,
             "name": self.name,
             "address": self.address,
             "items": self.item_ids

@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 
+from globals import ObjectType
 from Logic.Donor import Donor
 
 class AddOrEdit(tk.Frame):
@@ -28,9 +29,10 @@ class AddOrEdit(tk.Frame):
             self.callback(self.mode.get())
 
 class ModDonorForm(tk.Frame):
-    def __init__(self, parent, controller):
+    def __init__(self, parent, controller, callback=None):
         super().__init__(parent)
         self.controller = controller
+        self.callback = callback
 
         self.name_var = tk.StringVar()
         self.address_var = tk.StringVar()
@@ -41,8 +43,8 @@ class ModDonorForm(tk.Frame):
         name_label = ttk.Label(self, text="Name")
         address_label = ttk.Label(self, text="Address")
         ID_entry = tk.Entry(self, textvariable=self.next_id, state="readonly")
-        name_entry = ttk.Entry(self, textvariable=self.name_var)
-        address_entry = ttk.Entry(self, textvariable=self.address_var)
+        self.name_entry = ttk.Entry(self, textvariable=self.name_var)
+        self.address_entry = ttk.Entry(self, textvariable=self.address_var)
 
         self.grid_rowconfigure(0)
         self.grid_rowconfigure(1)
@@ -57,29 +59,36 @@ class ModDonorForm(tk.Frame):
         ID_label.grid(row=1, column=0, padx=10, pady=10)
         ID_entry.grid(row=1, column=1, padx=10, pady=10)
         name_label.grid(row=1, column=2, padx=10, pady=10)
-        name_entry.grid(row=1, column=3, padx=10, pady=10)
+        self.name_entry.grid(row=1, column=3, padx=10, pady=10)
         address_label.grid(row=2, column=0, padx=10, pady=10)
-        address_entry.grid(row=2, column=1, columnspan=3, sticky="ew", padx=10, pady=10)
+        self.address_entry.grid(row=2, column=1, columnspan=3, sticky="ew", padx=10, pady=10)
 
-        self.next_id.set(self.controller.all_data.next_donor_id)
+        self.next_id.set(self.controller.all_data.next_ids[ObjectType.DONOR.value])
 
     def on_mode_change(self, modeIn):
         self.mode = modeIn
         if modeIn == "ADD":
-            self.next_id.set(self.controller.all_data.next_donor_id)
-            self.submit_button = ttk.Button(self, text="Add donor", command=self.commitAction)
+            self.next_id.set(self.controller.all_data.next_ids[ObjectType.DONOR.value])
+            self.submit_button = ttk.Button(self, text="Add donor", command=self.commit_action)
             self.submit_button.grid(row=3, column=0, columnspan=4, sticky="ew", padx=10, pady=10)
         elif modeIn == "EDIT":
             self.next_id.set("Unfinished")
-            self.submit_button = ttk.Button(self, text="Edit donor", command=self.commitAction)
+            self.submit_button = ttk.Button(self, text="Edit donor", command=self.commit_action)
             self.submit_button.grid(row=3, column=0, columnspan=4, sticky="ew", padx=10, pady=10)
 
-    def commitAction(self):
+    def commit_action(self):
+        itemID = self.next_id.get()
         if self.mode == "ADD":
-            self.controller.all_data.add_donor(self.name_var.get(), self.address_var.get())
-            self.next_id.set(self.controller.all_data.next_donor_id)
-            for donor in self.controller.all_data.donors:
-                print(donor)
+            self.controller.all_data.create(ObjectType.DONOR.value, idIn=self.next_id.get(), nameIn=self.name_var.get(), addressIn=self.address_var.get())
+            self.next_id.set(self.controller.all_data.next_ids[ObjectType.DONOR.value])
+            self.name_entry.delete(0, tk.END)
+            self.address_entry.delete(0, tk.END)
+        elif self.mode == "EDIT":
+            pass
+        else:
+            pass
+
+        self.callback()
 
 class DonorsPage(tk.Frame):
     def __init__(self, parent, controller, nav):
@@ -93,21 +102,21 @@ class DonorsPage(tk.Frame):
         label = ttk.Label(self, text="Donors", font=("Arial", 16))
         # TODO: Add add donor page
         label_frame = ttk.LabelFrame(self, text="Add/Edit", relief="ridge", borderwidth=3)
-        mod_frame = ModDonorForm(label_frame, controller).pack()
+        mod_frame = ModDonorForm(label_frame, controller, callback=self.update_donors).pack()
         # TODO: Add edit donor page
         # TODO: Add delete donor page
         delete_button = ttk.Button(self, text="Delete Donor", command=lambda: parent.master.show_frame("UnfinishedPage"))
         back_button = ttk.Button(self, text="Back to Home", command=lambda: parent.master.go_back())
-        donor_treeview = ttk.Treeview(self, columns=treeview_columns, show="headings")
+        self.donor_treeview = ttk.Treeview(self, columns=treeview_columns, show="headings")
 
-        donor_treeview.heading("ID", text="ID")
-        donor_treeview.column("ID", width=50, anchor="center")
-        donor_treeview.heading("Name", text="Name")
-        donor_treeview.column("Name", width=100, anchor="center")
-        donor_treeview.heading("Address", text="Address")
-        donor_treeview.column("Address", width=150, anchor="center")
-        donor_treeview.heading("Items", text="Items Donated")
-        donor_treeview.column("Items", width=100, anchor="center")
+        self.donor_treeview.heading("ID", text="ID")
+        self.donor_treeview.column("ID", width=50, anchor="center")
+        self.donor_treeview.heading("Name", text="Name")
+        self.donor_treeview.column("Name", width=100, anchor="center")
+        self.donor_treeview.heading("Address", text="Address")
+        self.donor_treeview.column("Address", width=150, anchor="center")
+        self.donor_treeview.heading("Items", text="Items Donated")
+        self.donor_treeview.column("Items", width=100, anchor="center")
 
         self.grid_rowconfigure(0, weight=2)
         self.grid_rowconfigure(1, weight=1)
@@ -121,8 +130,14 @@ class DonorsPage(tk.Frame):
         label_frame.grid(row=1, column=0, padx=10, pady=10, sticky="ew")
         delete_button.grid(row=2, column=0, padx=10, pady=10, sticky="ew")
         back_button.grid(row=3, column=0, padx=10, pady=10, sticky="ew")
-        donor_treeview.grid(row=1, column=1, rowspan=4, padx=10, pady=10, sticky="nsew")
+        self.donor_treeview.grid(row=1, column=1, rowspan=4, padx=10, pady=10, sticky="nsew")
 
     # TODO: Write function to update the treeview
     def update_donors(self):
+        for row in self.donor_treeview.get_children():
+            self.donor_treeview.delete(row)
+        for donor in self.controller.all_data.object_list[ObjectType.DONOR.value]:
+            print(self.controller.all_data.object_list[ObjectType.DONOR.value][donor])
+            donor_object = self.controller.all_data.object_list[ObjectType.DONOR.value][donor]
+            self.donor_treeview.insert("", tk.END, values=(donor_object.id, donor_object.name, donor_object.address))
         pass
