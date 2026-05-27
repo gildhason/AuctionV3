@@ -4,6 +4,8 @@ class Object:
         self.id = idIn
         self.name = nameIn
 
+    def save(self, file):
+        file.dumps(vars(self))
 
 class Donor(Object):
     def __init__(self, idIn, nameIn, addressIn, itemsIn=[]):

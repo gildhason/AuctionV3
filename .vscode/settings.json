@@ -1,0 +1,25 @@
+{
+    "vscode-pokemon.defaultPokemon": [
+        {
+            "type": "glaceon",
+            "name": "glaceon"
+        },
+        {
+            "type": "steelix",
+            "name": "steelix"
+        },
+        {
+            "type": "pachirisu",
+            "name": "pachirisu"
+        },
+        {
+            "type": "vulpix",
+            "name": "vulpix",
+            "shiny": "true"
+        },
+        {
+            "type": "flygon",
+            "name": "flygon"
+        }
+    ]
+}

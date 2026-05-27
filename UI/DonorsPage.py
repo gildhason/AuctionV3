@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 
 from globals import ObjectType
-from Logic.Donor import Donor
+from Logic.Classes import Donor
 
 class AddOrEdit(tk.Frame):
     def __init__(self, parent, controller, callback=None):
@@ -77,7 +77,6 @@ class ModDonorForm(tk.Frame):
             self.submit_button.grid(row=3, column=0, columnspan=4, sticky="ew", padx=10, pady=10)
 
     def commit_action(self):
-        itemID = self.next_id.get()
         if self.mode == "ADD":
             self.controller.all_data.create(ObjectType.DONOR.value, idIn=self.next_id.get(), nameIn=self.name_var.get(), addressIn=self.address_var.get())
             self.next_id.set(self.controller.all_data.next_ids[ObjectType.DONOR.value])
@@ -98,12 +97,9 @@ class DonorsPage(tk.Frame):
 
         treeview_columns = ("ID", "Name", "Address", "Items")
 
-        # Create a label
         label = ttk.Label(self, text="Donors", font=("Arial", 16))
-        # TODO: Add add donor page
         label_frame = ttk.LabelFrame(self, text="Add/Edit", relief="ridge", borderwidth=3)
         mod_frame = ModDonorForm(label_frame, controller, callback=self.update_donors).pack()
-        # TODO: Add edit donor page
         # TODO: Add delete donor page
         delete_button = ttk.Button(self, text="Delete Donor", command=lambda: parent.master.show_frame("UnfinishedPage"))
         back_button = ttk.Button(self, text="Back to Home", command=lambda: parent.master.go_back())
@@ -137,7 +133,6 @@ class DonorsPage(tk.Frame):
         for row in self.donor_treeview.get_children():
             self.donor_treeview.delete(row)
         for donor in self.controller.all_data.object_list[ObjectType.DONOR.value]:
-            print(self.controller.all_data.object_list[ObjectType.DONOR.value][donor])
+            # print(self.controller.all_data.object_list[ObjectType.DONOR.value][donor])
             donor_object = self.controller.all_data.object_list[ObjectType.DONOR.value][donor]
             self.donor_treeview.insert("", tk.END, values=(donor_object.id, donor_object.name, donor_object.address))
-        pass

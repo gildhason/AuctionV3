@@ -16,21 +16,11 @@ class AllData:
         self.class_list = [Donor, Item, Buyer]
         self.object_list = [{}, {}, {}]
         self.next_ids = [1, 1, 1]
-        # self.next_donor_id_num = 1
-        # self.next_item_id_num = 1
-        # self.next_buyer_id_num = 1
-
-        # self.donors = [] # self.read_donors()
-        # self.items  = self.read_items()
-        # self.buyers = self.read_buyers()
-
-        # self.next_donor_id = f"D{self.next_donor_id_num:03}"
-        # self.next_item_id = f"D{self.next_item_id_num}"
-        # self.next_buyer_id = f"D{self.next_buyer_id_num}"
 
     def create(self, entity_type, **kwargs):
         cls = self.class_list[entity_type]
         object = cls(**kwargs)
+        print(vars(object))
         self.object_list[entity_type][kwargs["idIn"]] = object
         if int(object.id) >= self.next_ids[entity_type]:
             self.next_ids[entity_type] = int(object.id) + 1
@@ -58,13 +48,4 @@ class AllData:
 
     # TODO: Write function for reading list of buyers and update nextBuyerID
     def read_buyers(self):
-        pass
-
-    # !! TODO: Ensure that donor ID has 'D' and three digits
-    def add_donor(self, nameIn, addressIn):
-        newDonor = Donor(self.next_donor_id, nameIn, addressIn)
-        self.donors.append(newDonor)
-        newDonor.save_donor()
-        self.next_donor_id_num += 1
-        self.next_donor_id = f"D{self.next_donor_id_num:03}"
         pass
