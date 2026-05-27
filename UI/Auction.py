@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
 
+from globals import ObjectType
+from UI.PersonsPage import PersonsPage
 from UI.registry import PAGES
 
 class NavigationManager:
@@ -37,6 +39,14 @@ class Auction(tk.Tk):
             page = PageClass(container, self, self.nav)
             self.frames[PageClass.__name__] = page
             page.grid(row = 0, column = 0, sticky = "nsew")
+
+        page = PersonsPage(container, self, ObjectType.DONOR, self.nav)
+        self.frames["DonorsPage"] = page
+        page.grid(row = 0, column = 0, sticky = "nsew")
+
+        page = PersonsPage(container, self, ObjectType.BUYER, self.nav)
+        self.frames["BuyersPage"] = page
+        page.grid(row = 0, column = 0, sticky = "nsew")
 
         self.show_frame("HomePage")
 

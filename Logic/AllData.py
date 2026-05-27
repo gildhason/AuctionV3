@@ -17,14 +17,17 @@ class AllData:
         self.object_list = [{}, {}, {}]
         self.next_ids = [1, 1, 1]
 
-    def create(self, entity_type, **kwargs):
-        cls = self.class_list[entity_type]
+    def create_object(self, entity_type, **kwargs):
+        cls = self.class_list[entity_type.value]
         object = cls(**kwargs)
-        print(vars(object))
-        self.object_list[entity_type][kwargs["idIn"]] = object
-        if int(object.id) >= self.next_ids[entity_type]:
-            self.next_ids[entity_type] = int(object.id) + 1
+        # print(vars(object))
+        self.object_list[entity_type.value][kwargs["idIn"]] = object
+        if int(object.id) >= self.next_ids[entity_type.value]:
+            self.next_ids[entity_type.value] = int(object.id) + 1
         return cls(**kwargs)
+
+    def delete_object(self, entity_type, idIn):
+        del self.object_list[entity_type.value][idIn]
 
     def read_objects(self):
         pass

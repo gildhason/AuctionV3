@@ -29,3 +29,6 @@ class Buyer(Object):
         super().__init__(idIn, nameIn)
         self.address = addressIn
         self.items = itemsIn
+
+    def __str__(self):
+        return f"ID: {self.id}, Name: {self.name}, Address: {self.address}"
