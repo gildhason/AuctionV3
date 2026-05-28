@@ -43,7 +43,6 @@ class ModPersonForm(tk.Frame):
         self.address_var = tk.StringVar()
 
         self.next_id = tk.StringVar()
-        add_or_edit = AddOrEdit(self, controller, self.type, self.person_type_label, callback=self.on_mode_change)
         ID_label = ttk.Label(self, text="ID")
         name_label = ttk.Label(self, text="Name")
         address_label = ttk.Label(self, text="Address")
@@ -60,7 +59,6 @@ class ModPersonForm(tk.Frame):
         self.grid_columnconfigure(2)
         self.grid_columnconfigure(3)
 
-        add_or_edit.grid(row=0, column=0, padx=10, pady=10, columnspan=4)
         ID_label.grid(row=1, column=0, padx=10, pady=10)
         ID_entry.grid(row=1, column=1, padx=10, pady=10)
         name_label.grid(row=1, column=2, padx=10, pady=10)
@@ -70,29 +68,51 @@ class ModPersonForm(tk.Frame):
 
         self.next_id.set(self.controller.all_data.next_ids[self.type.value])
 
+        add_or_edit = AddOrEdit(self, controller, self.type, self.person_type_label, callback=self.on_mode_change)
+        add_or_edit.grid(row=0, column=0, padx=10, pady=10, columnspan=4)
+
     def on_mode_change(self, modeIn):
         self.mode = modeIn
         if modeIn == "ADD":
             self.next_id.set(self.controller.all_data.next_ids[self.type.value])
+            self.name_entry.delete(0, tk.END)
+            self.address_entry.delete(0, tk.END)
             self.submit_button = ttk.Button(self, text=f"Add {self.person_type_label}", command=self.commit_action)
             self.submit_button.grid(row=3, column=0, columnspan=4, sticky="ew", padx=10, pady=10)
         elif modeIn == "EDIT":
-            self.next_id.set("Unfinished")
+            self.next_id.set("")
             self.submit_button = ttk.Button(self, text=f"Edit {self.person_type_label}", command=self.commit_action)
             self.submit_button.grid(row=3, column=0, columnspan=4, sticky="ew", padx=10, pady=10)
 
     def commit_action(self):
         if self.mode == "ADD":
+            if self.name_var.get() == "" or self.address_var.get() == "":
+                return
             self.controller.all_data.create_object(self.type, idIn=self.next_id.get(), nameIn=self.name_var.get(), addressIn=self.address_var.get())
             self.next_id.set(self.controller.all_data.next_ids[self.type.value])
             self.name_entry.delete(0, tk.END)
             self.address_entry.delete(0, tk.END)
         elif self.mode == "EDIT":
-            pass
+            if self.next_id.get() == "":
+                return
+            person = self.controller.all_data.object_list[self.type.value][self.next_id.get()]
+            person.name = self.name_var.get()
+            person.address = self.address_var.get()
         else:
             pass
 
         self.callback()
+
+    def set_fields_on_parent_request(self, idIn, nameIn, addressIn):
+        if self.mode == "EDIT":
+            if idIn is not None:
+                self.next_id.set(idIn)
+                self.name_var.set(nameIn) 
+                self.address_var.set(addressIn) 
+            else:
+                self.next_id.set("")
+                self.name_entry.delete(0, tk.END)
+                self.address_entry.delete(0, tk.END)
 
 class PersonsPage(tk.Frame):
     def __init__(self, parent, controller, person_type, nav):
@@ -115,11 +135,13 @@ class PersonsPage(tk.Frame):
 
         label = ttk.Label(self, text=f"{self.person_type_label}s", font=("Arial", 16))
         label_frame = ttk.LabelFrame(self, text="Add/Edit", relief="ridge", borderwidth=3)
-        mod_frame = ModPersonForm(label_frame, controller, self.type, self.person_type_label, callback=self.update_persons).pack()
-        # TODO: Add delete person page
+        self.mod_frame = ModPersonForm(label_frame, controller, self.type, self.person_type_label, callback=self.update_persons)
+        self.mod_frame.pack()
+
         delete_button = ttk.Button(self, text=f"Delete {self.person_type_label}", command=self.delete_person)
         back_button = ttk.Button(self, text="Back to Home", command=lambda: parent.master.go_back())
         self.person_treeview = ttk.Treeview(self, columns=treeview_columns, show="headings")
+        self.person_treeview.bind("<<TreeviewSelect>>", self.on_tree_click)
 
         self.person_treeview.heading("ID", text="ID")
         self.person_treeview.column("ID", width=50, anchor="center")
@@ -159,4 +181,13 @@ class PersonsPage(tk.Frame):
         
         person_id = self.person_treeview.item(selection[0], "values")[0]
         self.controller.all_data.delete_object(self.type, person_id)
+        self.mod_frame.set_fields_on_parent_request(None, None, None)
         self.update_persons()
+
+    def on_tree_click(self, event):
+        selection = self.person_treeview.selection()
+        if not selection:
+            return
+        
+        values = self.person_treeview.item(selection[0], "values")
+        self.mod_frame.set_fields_on_parent_request(values[0], values[1], values[2])
