@@ -93,7 +93,9 @@ class ModPersonForm(tk.Frame):
             self.name_entry.delete(0, tk.END)
             self.address_entry.delete(0, tk.END)
         elif self.mode == "EDIT":
-            if self.next_id.get() == "":
+            if self.next_id.get() == "": # Occurs when shifting from Add to Edit mode
+                return
+            if self.name_var.get() == "" or self.address_var.get() == "":
                 return
             person = self.controller.all_data.object_list[self.type.value][self.next_id.get()]
             person.name = self.name_var.get()
