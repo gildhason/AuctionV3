@@ -45,7 +45,6 @@ class Object:
         with open(filename, mode="x") as f:
             json.dump(self.to_dict(), f, indent=4)
 
-
 class Donor(Object):
     def __init__(self, idIn, nameIn, addressIn, itemsIn=[]):
         super().__init__(idIn, nameIn)
@@ -83,3 +82,14 @@ class Buyer(Object):
 
     def __str__(self):
         return f"ID: {self.id}, Name: {self.name}, Address: {self.address}"
+
+    def to_dict(self):
+        data = super().to_dict()
+        data.update({
+            "address": self.address,
+            "items": self.items
+        })
+        return data
+
+    def from_dict(self, data):
+        return Donor(data["id"], data["name"], data["address"], data["items"])
