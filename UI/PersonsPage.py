@@ -79,6 +79,7 @@ class ModPersonForm(tk.Frame):
             self.address_entry.delete(0, tk.END)
             self.submit_button = ttk.Button(self, text=f"Add {self.person_type_label}", command=self.commit_action)
             self.submit_button.grid(row=3, column=0, columnspan=4, sticky="ew", padx=10, pady=10)
+        # TODO: Disable next_id clear when already in edit mode
         elif modeIn == "EDIT":
             self.next_id.set("")
             self.submit_button = ttk.Button(self, text=f"Edit {self.person_type_label}", command=self.commit_action)
