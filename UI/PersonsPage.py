@@ -100,6 +100,7 @@ class ModPersonForm(tk.Frame):
             person = self.controller.all_data.object_list[self.type.value][self.next_id.get()]
             person.name = self.name_var.get()
             person.address = self.address_var.get()
+            person.save()
         else:
             pass
 
