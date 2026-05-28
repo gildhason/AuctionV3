@@ -42,6 +42,8 @@ class ModPersonForm(tk.Frame):
         self.name_var = tk.StringVar()
         self.address_var = tk.StringVar()
 
+        self.mode = None
+
         self.next_id = tk.StringVar()
         ID_label = ttk.Label(self, text="ID")
         name_label = ttk.Label(self, text="Name")
@@ -72,6 +74,8 @@ class ModPersonForm(tk.Frame):
         add_or_edit.grid(row=0, column=0, padx=10, pady=10, columnspan=4)
 
     def on_mode_change(self, modeIn):
+        if self.mode == modeIn:
+            return
         self.mode = modeIn
         if modeIn == "ADD":
             self.next_id.set(self.controller.all_data.next_ids[self.type.value])
