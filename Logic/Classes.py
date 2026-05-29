@@ -1,5 +1,6 @@
 import json
 import os
+import traceback
 
 from globals import donors_dir, items_dir, buyers_dir
 
@@ -26,15 +27,7 @@ class Object:
             return id_int
 
     def save(self):
-        directory = None
-        if isinstance(self, Donor):
-            directory = donors_dir
-        elif isinstance(self, Item):
-            directory = items_dir
-        elif isinstance(self, Buyer):
-            directory = buyers_dir
-        else:
-            print("Unrecognized object trying to save")
+        directory = self.get_dir()
         
         filename = f"{directory}{self.convert_id_to_file_id(self.id, True)}.json"
         try:
@@ -44,6 +37,23 @@ class Object:
 
         with open(filename, mode="x") as f:
             json.dump(self.to_dict(), f, indent=4)
+
+    def delete(self):
+        # traceback.print_stack()
+        directory = self.get_dir()
+        filename = f"{directory}{self.convert_id_to_file_id(self.id, True)}.json"
+        os.remove(filename)
+
+    def get_dir(self):
+        if isinstance(self, Donor):
+            return donors_dir
+        elif isinstance(self, Item):
+            return items_dir
+        elif isinstance(self, Buyer):
+            return buyers_dir
+        else:
+            print("Unrecognized object trying to save")
+            return None
 
 class Donor(Object):
     def __init__(self, idIn, nameIn, addressIn, itemsIn=[]):

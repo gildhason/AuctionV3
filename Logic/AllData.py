@@ -39,6 +39,8 @@ class AllData:
         return object
 
     def delete_object(self, entity_type, idIn):
+        object = self.object_list[entity_type.value][idIn]
+        object.delete()
         del self.object_list[entity_type.value][idIn]
 
     def read_objects(self):
