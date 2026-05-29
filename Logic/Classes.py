@@ -5,9 +5,9 @@ import traceback
 from globals import donors_dir, items_dir, buyers_dir
 
 class Object:
-    def __init__(self, idIn, nameIn):
-        self.id = idIn
-        self.name = nameIn
+    def __init__(self, id, name):
+        self.id = id
+        self.name = name
 
     def to_dict(self):
         return {
@@ -16,14 +16,14 @@ class Object:
             "name": self.name,
         }
 
-    def convert_id_to_file_id(self, idIn, int_to_str):
+    def convert_id_to_file_id(self, id, int_to_str):
         if int_to_str:
-            id_str = str(idIn)
+            id_str = str(id)
             while len(id_str) < 3:
                 id_str = "".join(["0", id_str])
             return id_str
         else:
-            id_int = int(idIn)
+            id_int = int(id)
             return id_int
 
     def save(self):
@@ -37,6 +37,11 @@ class Object:
 
         with open(filename, mode="x") as f:
             json.dump(self.to_dict(), f, indent=4)
+    
+    def edit(self, kwargs):
+        for key in self.REQUIRED:
+            if key in kwargs:
+                setattr(self, key, kwargs[key])
 
     def delete(self):
         # traceback.print_stack()
@@ -56,10 +61,13 @@ class Object:
             return None
 
 class Donor(Object):
-    def __init__(self, idIn, nameIn, addressIn, itemsIn=[]):
-        super().__init__(idIn, nameIn)
-        self.address = addressIn
-        self.items = itemsIn
+    REQUIRED = ["id", "name", "address"]
+
+    def __init__(self, id, name, address, items=[]):
+        super().__init__(id, name)
+        self.address = address
+        self.items = items
+        print(self)
 
     def __str__(self):
         return f"ID: {self.id}, Name: {self.name}, Address: {self.address}"
@@ -77,18 +85,39 @@ class Donor(Object):
 
 
 class Item(Object):
-    def __init__(self, idIn, nameIn, donor, startingPrice, buyer, endingPrice):
-        super().__init__(idIn, nameIn)
+    REQUIRED = ["id", "name", "donor", "starting_price", "buyer", "ending_price"]
+
+    def __init__(self, id, name, donor, starting_price, buyer, ending_price):
+        super().__init__(id, name)
         self.donor = donor
-        self.startingPrice = startingPrice
+        self.starting_price = starting_price
         self.buyer = buyer
-        self.endingPrice = endingPrice
+        self.ending_price = ending_price
+        print(self)
+
+    def __str__(self):
+        return f"ID: {self.id}, Name: {self.name}, Donor: {self.donor}, Starting Price: {self.starting_price}, Buyer: {self.buyer}, Ending Price: {self.ending_price}"
+
+    def to_dict(self):
+        data = super().to_dict()
+        data.update({
+            "donor": self.donor,
+            "starting_price": self.starting_price,
+            "buyer": self.buyer,
+            "ending_price": self.ending_price
+        })
+        return data
+
+    def from_dict(self, data):
+        return Donor(data["id"], data["name"], data["address"], data["items"])
 
 class Buyer(Object):
-    def __init__(self, idIn, nameIn, addressIn, itemsIn=[]):
-        super().__init__(idIn, nameIn)
-        self.address = addressIn
-        self.items = itemsIn
+    REQUIRED = ["id", "name", "address"]
+
+    def __init__(self, id, name, address, items=[]):
+        super().__init__(id, name)
+        self.address = address
+        self.items = items
 
     def __str__(self):
         return f"ID: {self.id}, Name: {self.name}, Address: {self.address}"

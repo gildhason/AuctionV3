@@ -105,44 +105,67 @@ class ModPersonForm(tk.Frame):
         if modeIn == "ADD":
             self.next_id.set(self.controller.all_data.next_ids[self.type.value])
             self.name_entry.delete(0, tk.END)
-            self.address_entry.delete(0, tk.END)
+            if self.type != ObjectType.ITEM:
+                self.address_entry.delete(0, tk.END)
+            else:
+                self.donor_entry.delete(0, tk.END)
+                self.starting_price_entry.delete(0, tk.END)
+                self.buyer_entry.delete(0, tk.END)
+                self.ending_price_entry.delete(0, tk.END)
             self.submit_button = ttk.Button(self, text=f"Add {self.person_type_label}", command=self.commit_action)
-            # self.submit_button.grid(row=3, column=0, columnspan=4, sticky="ew", padx=10, pady=10)
-        # TODO: Disable next_id clear when already in edit mode
         elif modeIn == "EDIT":
             self.next_id.set("")
             self.submit_button = ttk.Button(self, text=f"Edit {self.person_type_label}", command=self.commit_action)
-            # self.submit_button.grid(row=3, column=0, columnspan=4, sticky="ew", padx=10, pady=10)
         self.submit_button.grid(row=submit_button_row, column=0, columnspan=4, sticky="ew", padx=10, pady=10)
 
     def commit_action(self):
         if self.mode == "ADD":
-            if self.name_var.get() == "" or self.address_var.get() == "":
-                return
-            self.controller.all_data.create_object(self.type, idIn=self.next_id.get(), nameIn=self.name_var.get(), addressIn=self.address_var.get())
+            if self.type != ObjectType.ITEM:
+                if self.name_var.get() == "" or self.address_var.get() == "":
+                    return
+            else:
+                if self.name_var.get() == "" or self.donor_var.get() == "" or self.starting_price_var.get() == "" or self.buyer_var.get() == "" or self.ending_price_var.get() == "":
+                    return
+
+            self.controller.all_data.create_object(self.type, id=self.next_id.get(), name=self.name_var.get(), address=self.address_var.get(), donor=self.donor_var.get(), starting_price=self.starting_price_var.get(), buyer=self.buyer_var.get(), ending_price=self.ending_price_var.get())
             self.next_id.set(self.controller.all_data.next_ids[self.type.value])
             self.name_entry.delete(0, tk.END)
-            self.address_entry.delete(0, tk.END)
+            if self.type != ObjectType.ITEM:
+                self.address_entry.delete(0, tk.END)
+            else:
+                self.donor_entry.delete(0, tk.END)
+                self.starting_price_entry.delete(0, tk.END)
+                self.buyer_entry.delete(0, tk.END)
+                self.ending_price_entry.delete(0, tk.END)
         elif self.mode == "EDIT":
             if self.next_id.get() == "": # Occurs when shifting from Add to Edit mode
                 return
-            if self.name_var.get() == "" or self.address_var.get() == "":
-                return
-            person = self.controller.all_data.object_list[self.type.value][self.next_id.get()]
-            person.name = self.name_var.get()
-            person.address = self.address_var.get()
-            person.save()
+            if self.type != ObjectType.ITEM:
+                if self.name_var.get() == "" or self.address_var.get() == "":
+                    return
+            else:
+                if self.name_var.get() == "" or self.donor_var.get() == "" or self.starting_price_var.get() == "" or self.buyer_var.get() == "" or self.ending_price_var.get() == "":
+                    return
+            # object = self.controller.all_data.object_list[self.type.value][self.next_id.get()]
+            # object.name = self.name_var.get()
+            # object.address = self.address_var.get()
+            # object.save()
+            self.controller.all_data.edit_object(self.type, id=self.next_id.get(), name=self.name_var.get(), address=self.address_var.get(), donor=self.donor_var.get(), starting_price=self.starting_price_var.get(), buyer=self.buyer_var.get(), ending_price=self.ending_price_var.get())
         else:
             pass
 
         self.callback()
 
-    def set_fields_on_parent_request(self, idIn, nameIn, addressIn):
+    def set_fields_on_parent_request(self, **kwargs):
         if self.mode == "EDIT":
-            if idIn is not None:
-                self.next_id.set(idIn)
-                self.name_var.set(nameIn) 
-                self.address_var.set(addressIn) 
+            if kwargs["id"] != "":
+                self.next_id.set(kwargs["id"])
+                self.name_var.set(kwargs["name"]) 
+                self.address_var.set(kwargs["address"]) 
+                self.donor_var.set(kwargs["donor"])
+                self.starting_price_var.set(kwargs["starting_price"])
+                self.buyer_var.set(kwargs["buyer"])
+                self.ending_price_var.set(kwargs["ending_price"])
             else:
                 self.next_id.set("")
                 self.name_entry.delete(0, tk.END)
@@ -235,7 +258,18 @@ class ObjectsPage(tk.Frame):
             self.object_treeview.delete(row)
         for object in self.controller.all_data.object_list[self.type.value]:
             this_object = self.controller.all_data.object_list[self.type.value][object]
-            self.object_treeview.insert("", tk.END, values=(this_object.id, this_object.name, this_object.address))
+            if self.type != ObjectType.ITEM:
+                # TODO: Display list of objects associated with person
+                self.object_treeview.insert("", tk.END, values=(this_object.id, this_object.name, this_object.address))
+            else:
+                self.object_treeview.insert("",
+                                            tk.END,
+                                            values=(this_object.id,
+                                                    this_object.name,
+                                                    this_object.donor,
+                                                    this_object.starting_price,
+                                                    this_object.buyer,
+                                                    this_object.ending_price))
 
     def delete_object(self):
         selection = self.object_treeview.selection()
@@ -244,7 +278,7 @@ class ObjectsPage(tk.Frame):
         
         object_id = self.object_treeview.item(selection[0], "values")[0]
         self.controller.all_data.delete_object(self.type, object_id)
-        self.mod_frame.set_fields_on_parent_request(None, None, None)
+        self.mod_frame.set_fields_on_parent_request(id="", name="", address="", donor="", starting_price="", buyer="", ending_price="")
         self.update_objects()
 
     def on_tree_click(self, event):
@@ -253,4 +287,7 @@ class ObjectsPage(tk.Frame):
             return
         
         values = self.object_treeview.item(selection[0], "values")
-        self.mod_frame.set_fields_on_parent_request(values[0], values[1], values[2])
+        if self.type != ObjectType.ITEM:
+            self.mod_frame.set_fields_on_parent_request(id=values[0], name=values[1], address=values[2], donor="", starting_price="", buyer="", ending_price="")
+        else:
+            self.mod_frame.set_fields_on_parent_request(id=values[0], name=values[1], address="", donor=values[2], starting_price=values[3], buyer=values[4], ending_price=values[5])

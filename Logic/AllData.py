@@ -29,14 +29,20 @@ class AllData:
 
     def create_object(self, entity_type, **kwargs):
         cls = self.class_list[entity_type.value]
-        object = cls(**kwargs)
+        params = {key: kwargs[key] for key in cls.REQUIRED}
+        object = cls(**params)
         # print(vars(object))
-        self.object_list[entity_type.value][kwargs["idIn"]] = object
+        self.object_list[entity_type.value][kwargs["id"]] = object
         if int(object.id) >= self.next_ids[entity_type.value]:
             self.next_ids[entity_type.value] = int(object.id) + 1
-        object = cls(**kwargs)
         object.save()
         return object
+
+    def edit_object(self, entity_type, **kwargs):
+        object = self.object_list[entity_type.value][kwargs["id"]]
+        object.edit(kwargs)
+        object.save()
+        pass
 
     def delete_object(self, entity_type, idIn):
         object = self.object_list[entity_type.value][idIn]
