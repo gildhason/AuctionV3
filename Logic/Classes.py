@@ -44,7 +44,6 @@ class Object:
                 setattr(self, key, kwargs[key])
 
     def delete(self):
-        # traceback.print_stack()
         directory = self.get_dir()
         filename = f"{directory}{self.convert_id_to_file_id(self.id, True)}.json"
         os.remove(filename)
@@ -67,7 +66,6 @@ class Donor(Object):
         super().__init__(id, name)
         self.address = address
         self.items = items
-        print(self)
 
     def __str__(self):
         return f"ID: {self.id}, Name: {self.name}, Address: {self.address}"
@@ -93,7 +91,6 @@ class Item(Object):
         self.starting_price = starting_price
         self.buyer = buyer
         self.ending_price = ending_price
-        print(self)
 
     def __str__(self):
         return f"ID: {self.id}, Name: {self.name}, Donor: {self.donor}, Starting Price: {self.starting_price}, Buyer: {self.buyer}, Ending Price: {self.ending_price}"

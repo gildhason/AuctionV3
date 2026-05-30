@@ -32,6 +32,9 @@ class AddOrEdit(tk.Frame):
             self.callback(self.mode.get())
 
 class ModPersonForm(tk.Frame):
+    donor_list = []
+    buyer_list = []
+
     def __init__(self, parent, controller, person_type, person_type_label, callback=None):
         super().__init__(parent)
         self.controller = controller
@@ -59,9 +62,9 @@ class ModPersonForm(tk.Frame):
         ID_entry = tk.Entry(self, textvariable=self.next_id, state="readonly")
         self.name_entry = ttk.Entry(self, textvariable=self.name_var)
         self.address_entry = ttk.Entry(self, textvariable=self.address_var)
-        self.donor_entry = ttk.Entry(self, textvariable=self.donor_var)
+        self.donor_combo = ttk.Combobox(self, textvariable=self.donor_var, values=ModPersonForm.donor_list)
         self.starting_price_entry = ttk.Entry(self, textvariable=self.starting_price_var)
-        self.buyer_entry = ttk.Entry(self, textvariable=self.buyer_var)
+        self.buyer_combo = ttk.Combobox(self, textvariable=self.buyer_var, values=ModPersonForm.buyer_list)
         self.ending_price_entry = ttk.Entry(self, textvariable=self.ending_price_var)
 
         self.grid_rowconfigure(0)
@@ -84,11 +87,11 @@ class ModPersonForm(tk.Frame):
             self.address_entry.grid(row=2, column=1, columnspan=3, sticky="ew", padx=10, pady=10)
         else:
             donor_label.grid(row=2, column=0, padx=10, pady=10)
-            self.donor_entry.grid(row=2, column=1, padx=10, pady=10)
+            self.donor_combo.grid(row=2, column=1, padx=10, pady=10)
             starting_price_label.grid(row=2, column=2, padx=10, pady=10)
             self.starting_price_entry.grid(row=2, column=3, padx=10, pady=10)
             buyer_label.grid(row=3, column=0, padx=10, pady=10)
-            self.buyer_entry.grid(row=3, column=1, padx=10, pady=10)
+            self.buyer_combo.grid(row=3, column=1, padx=10, pady=10)
             ending_price_label.grid(row=3, column=2, padx=10, pady=10)
             self.ending_price_entry.grid(row=3, column=3, padx=10, pady=10)
 
@@ -108,9 +111,9 @@ class ModPersonForm(tk.Frame):
             if self.type != ObjectType.ITEM:
                 self.address_entry.delete(0, tk.END)
             else:
-                self.donor_entry.delete(0, tk.END)
+                self.donor_combo.delete(0, tk.END)
                 self.starting_price_entry.delete(0, tk.END)
-                self.buyer_entry.delete(0, tk.END)
+                self.buyer_combo.delete(0, tk.END)
                 self.ending_price_entry.delete(0, tk.END)
             self.submit_button = ttk.Button(self, text=f"Add {self.person_type_label}", command=self.commit_action)
         elif modeIn == "EDIT":
@@ -124,7 +127,7 @@ class ModPersonForm(tk.Frame):
                 if self.name_var.get() == "" or self.address_var.get() == "":
                     return
             else:
-                if self.name_var.get() == "" or self.donor_var.get() == "" or self.starting_price_var.get() == "" or self.buyer_var.get() == "" or self.ending_price_var.get() == "":
+                if self.name_var.get() == "" or self.donor_var.get() == "" or self.starting_price_var.get() == "":
                     return
 
             self.controller.all_data.create_object(self.type, id=self.next_id.get(), name=self.name_var.get(), address=self.address_var.get(), donor=self.donor_var.get(), starting_price=self.starting_price_var.get(), buyer=self.buyer_var.get(), ending_price=self.ending_price_var.get())
@@ -133,9 +136,9 @@ class ModPersonForm(tk.Frame):
             if self.type != ObjectType.ITEM:
                 self.address_entry.delete(0, tk.END)
             else:
-                self.donor_entry.delete(0, tk.END)
+                self.donor_combo.delete(0, tk.END)
                 self.starting_price_entry.delete(0, tk.END)
-                self.buyer_entry.delete(0, tk.END)
+                self.buyer_combo.delete(0, tk.END)
                 self.ending_price_entry.delete(0, tk.END)
         elif self.mode == "EDIT":
             if self.next_id.get() == "": # Occurs when shifting from Add to Edit mode
@@ -144,12 +147,8 @@ class ModPersonForm(tk.Frame):
                 if self.name_var.get() == "" or self.address_var.get() == "":
                     return
             else:
-                if self.name_var.get() == "" or self.donor_var.get() == "" or self.starting_price_var.get() == "" or self.buyer_var.get() == "" or self.ending_price_var.get() == "":
+                if self.name_var.get() == "" or self.donor_var.get() == "" or self.starting_price_var.get() == "":
                     return
-            # object = self.controller.all_data.object_list[self.type.value][self.next_id.get()]
-            # object.name = self.name_var.get()
-            # object.address = self.address_var.get()
-            # object.save()
             self.controller.all_data.edit_object(self.type, id=self.next_id.get(), name=self.name_var.get(), address=self.address_var.get(), donor=self.donor_var.get(), starting_price=self.starting_price_var.get(), buyer=self.buyer_var.get(), ending_price=self.ending_price_var.get())
         else:
             pass
@@ -233,7 +232,6 @@ class ObjectsPage(tk.Frame):
         self.grid_rowconfigure(1, weight=1)
         self.grid_rowconfigure(2, weight=1)
         self.grid_rowconfigure(3, weight=1)
-        # if self.type == ObjectType.ITEM:
         self.grid_rowconfigure(4, weight=1)
         self.grid_rowconfigure(5, weight=1)
         self.grid_columnconfigure(0, weight=1)
@@ -270,6 +268,11 @@ class ObjectsPage(tk.Frame):
                                                     this_object.starting_price,
                                                     this_object.buyer,
                                                     this_object.ending_price))
+
+        if self.type == ObjectType.DONOR:
+            self.controller.frames["ItemsPage"].mod_frame.donor_combo["values"] = [f"{id}: {donor.name}" for id, donor in self.controller.all_data.object_list[ObjectType.DONOR.value].items()]
+        elif self.type == ObjectType.BUYER:
+            self.controller.frames["ItemsPage"].mod_frame.buyer_combo["values"] = [f"{id}: {buyer.name}" for id, buyer in self.controller.all_data.object_list[ObjectType.BUYER.value].items()]
 
     def delete_object(self):
         selection = self.object_treeview.selection()
