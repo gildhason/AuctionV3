@@ -3,6 +3,7 @@ import json
 import os
 from os import listdir
 from os.path import isfile, join
+from pathlib import Path
 
 from Logic.Classes import *
 
@@ -16,6 +17,7 @@ class AllData:
         self.class_list = [Donor, Item, Buyer]
         self.object_list = [{}, {}, {}]
         self.next_ids = [1, 1, 1]
+        self.load_object_files_on_init()
 
     def convert_id_to_file_id(self, idIn, int_to_str):
         if int_to_str:
@@ -33,8 +35,7 @@ class AllData:
         object = cls(**params)
         # print(vars(object))
         self.object_list[entity_type.value][kwargs["id"]] = object
-        if int(object.id) >= self.next_ids[entity_type.value]:
-            self.next_ids[entity_type.value] = int(object.id) + 1
+        self.set_next_id(entity_type.value, int(object.id))
         object.save()
         return object
 
@@ -52,23 +53,51 @@ class AllData:
     def read_objects(self):
         pass
 
-    # TODO: Write function for reading list of donors and update nextDonorID
-    def read_donors(self):
-        donor_list = [f for f in listdir("Data/Donors/") if isfile(join("Data/Donors/", f))]
-        donor_dict = {}
-        for file in donor_list:
-            with open(f"Data/Donors/{file}") as f:
-                donor_json = json.load(f)
-                donor_dict[donor_json["donor_id"]] = donor_json
-                if int(donor_json["donor_id"][1:]) >= self.next_donor_id_num:
-                    self.next_donor_id_num = int(donor_json["donor_id"][1:]) + 1
-                print(donor_dict)
-        return donor_dict
+    def set_next_id(self, index, num):
+        print(f"num: {num} | curr next id: {self.next_ids[index]}")
+        if num >= self.next_ids[index]:
+            self.next_ids[index] = num + 1
 
-    # TODO: Write function for reading list of items and update nextItemID
-    def read_items(self):
-        pass
+    def load_object_files_on_init(self):
+        dir_list = [donors_dir, items_dir, buyers_dir]
+        for dir in dir_list:
+            for file in Path(dir).glob("*.json"):
+                with open(file) as f:
+                    object_json = json.load(f)
+                    object = None
+                    if object_json["class"] == "Donor":
+                        object = Donor(
+                            object_json["id"],
+                            object_json["name"],
+                            object_json["address"],
+                            object_json["items"],
+                        )
+                        self.object_list[0][object_json["id"]] = object
+                        self.set_next_id(0, int(object_json["id"]))
+                    elif object_json["class"] == "Item":
+                        object = Item(
+                            object_json["id"],
+                            object_json["name"],
+                            object_json["donor"],
+                            object_json["starting_price"],
+                            object_json["buyer"],
+                            object_json["ending_price"],
+                        )
+                        self.object_list[1][object_json["id"]] = object
+                        self.set_next_id(1, int(object_json["id"]))
+                    elif object_json["class"] == "Buyer":
+                        object = Buyer(
+                            object_json["id"],
+                            object_json["name"],
+                            object_json["address"],
+                            object_json["items"],
+                        )
+                        self.object_list[2][object_json["id"]] = object
+                        self.set_next_id(2, int(object_json["id"]))
+                    
+        for i in range(0, 3):
+            self.object_list[i] = {
+                k: v
+                for k, v in sorted(self.object_list[i].items(), key=lambda item: int(item[0]))
+            }
 
-    # TODO: Write function for reading list of buyers and update nextBuyerID
-    def read_buyers(self):
-        pass

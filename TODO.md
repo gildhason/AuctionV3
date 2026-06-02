@@ -4,4 +4,4 @@
 - [ ] Total amount owed for buyers
 - [ ] Specifiable ID for buyers
 - [ ] Items must be appended to Donor/Buyer items lists
-- [ ] Load in items from files
+- [ ] Edits to items must sync with donors and buyers
