@@ -127,10 +127,11 @@ class ModPersonForm(tk.Frame):
                 if self.name_var.get() == "" or self.address_var.get() == "":
                     return
             else:
-                if self.name_var.get() == "" or self.donor_var.get() == "" or self.starting_price_var.get() == "":
+                # if self.name_var.get() == "" or self.donor_var.get() == "" or self.starting_price_var.get() == "":
+                if self.name_var.get() == "":
                     return
 
-            self.controller.all_data.create_object(self.type, id=self.next_id.get(), name=self.name_var.get(), address=self.address_var.get(), donor=self.donor_var.get(), starting_price=self.starting_price_var.get(), buyer=self.buyer_var.get(), ending_price=self.ending_price_var.get())
+            self.controller.all_data.create_object(self.type, id=self.next_id.get(), name=self.name_var.get(), address=self.address_var.get(), donor=self.donor_var.get().split(":")[0], starting_price=self.starting_price_var.get(), buyer=self.buyer_var.get().split(":")[0], ending_price=self.ending_price_var.get())
             self.next_id.set(self.controller.all_data.next_ids[self.type.value])
             self.name_entry.delete(0, tk.END)
             if self.type != ObjectType.ITEM:
@@ -147,9 +148,9 @@ class ModPersonForm(tk.Frame):
                 if self.name_var.get() == "" or self.address_var.get() == "":
                     return
             else:
-                if self.name_var.get() == "" or self.donor_var.get() == "" or self.starting_price_var.get() == "":
+                if self.name_var.get() == "":
                     return
-            self.controller.all_data.edit_object(self.type, id=self.next_id.get(), name=self.name_var.get(), address=self.address_var.get(), donor=self.donor_var.get(), starting_price=self.starting_price_var.get(), buyer=self.buyer_var.get(), ending_price=self.ending_price_var.get())
+            self.controller.all_data.edit_object(self.type, id=self.next_id.get(), name=self.name_var.get(), address=self.address_var.get(), donor=self.donor_var.get().split(":")[0], starting_price=self.starting_price_var.get(), buyer=self.buyer_var.get().split(":")[0], ending_price=self.ending_price_var.get())
         else:
             pass
 
@@ -257,16 +258,17 @@ class ObjectsPage(tk.Frame):
         for object in self.controller.all_data.object_list[self.type.value]:
             this_object = self.controller.all_data.object_list[self.type.value][object]
             if self.type != ObjectType.ITEM:
-                # TODO: Display list of objects associated with person
-                self.object_treeview.insert("", tk.END, values=(this_object.id, this_object.name, this_object.address))
+                self.object_treeview.insert("", tk.END, values=(this_object.id, this_object.name, this_object.address, ", ".join(this_object.items)))
             else:
+                donor_str = "" if this_object.donor == "" else f"{this_object.donor}: {self.controller.all_data.object_list[ObjectType.DONOR.value][this_object.donor].name}"
+                buyer_str = "" if this_object.buyer == "" else f"{this_object.buyer}: {self.controller.all_data.object_list[ObjectType.BUYER.value][this_object.buyer].name}"
                 self.object_treeview.insert("",
                                             tk.END,
                                             values=(this_object.id,
                                                     this_object.name,
-                                                    this_object.donor,
+                                                    donor_str,
                                                     this_object.starting_price,
-                                                    this_object.buyer,
+                                                    buyer_str,
                                                     this_object.ending_price))
 
         if self.type == ObjectType.DONOR:

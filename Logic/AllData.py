@@ -6,6 +6,7 @@ from os.path import isfile, join
 from pathlib import Path
 
 from Logic.Classes import *
+from globals import ObjectType
 
 class ObjectData:
     def __init__(self, folder):
@@ -29,72 +30,85 @@ class AllData:
             id_int = int(idIn)
             return id_int
 
+    def update_people(self, item, old_donor_id = "", old_buyer_id = ""):
+        item_id = item.id
+        donor_id = item.donor
+        buyer_id = item.buyer
+        for buyer in self.object_list[2]:
+            print(f"Buyer: {self.object_list[2][buyer]}")
+        if old_donor_id != "" and old_donor_id != donor_id:
+            self.object_list[ObjectType.DONOR.value][donor_id].remove_item(item_id)
+        if old_buyer_id != "" and old_buyer_id != buyer_id:
+            self.object_list[ObjectType.BUYER.value][buyer_id].remove_item(item_id)
+        if donor_id != "" and item_id not in self.object_list[ObjectType.DONOR.value][donor_id].items:
+            self.object_list[ObjectType.DONOR.value][donor_id].add_item(item_id)
+            self.object_list[ObjectType.DONOR.value][donor_id].save()
+        if buyer_id != "" and item_id not in self.object_list[ObjectType.BUYER.value][buyer_id].items:
+            self.object_list[ObjectType.BUYER.value][buyer_id].add_item(item_id)
+            self.object_list[ObjectType.BUYER.value][buyer_id].save()
+        print(f"Item ID: {item_id}")
+        for buyer in self.object_list[2]:
+            print(self.object_list[2][buyer])
+        print("")
+
     def create_object(self, entity_type, **kwargs):
         cls = self.class_list[entity_type.value]
         params = {key: kwargs[key] for key in cls.REQUIRED}
         object = cls(**params)
-        # print(vars(object))
         self.object_list[entity_type.value][kwargs["id"]] = object
         self.set_next_id(entity_type.value, int(object.id))
         object.save()
+        print(object)
+        if entity_type == ObjectType.ITEM:
+            self.update_people(object)
         return object
 
     def edit_object(self, entity_type, **kwargs):
+        old_donor_id = None
+        old_buyer_id = None
+        if entity_type == ObjectType.ITEM:
+            old_donor_id = self.object_list[entity_type.value][kwargs["id"]].donor
+            old_buyer_id = self.object_list[entity_type.value][kwargs["id"]].buyer
         object = self.object_list[entity_type.value][kwargs["id"]]
         object.edit(kwargs)
         object.save()
-        pass
+        if entity_type == ObjectType.ITEM:
+            self.update_people(object, old_donor_id, old_buyer_id)
 
     def delete_object(self, entity_type, idIn):
         object = self.object_list[entity_type.value][idIn]
         object.delete()
         del self.object_list[entity_type.value][idIn]
 
-    def read_objects(self):
-        pass
-
     def set_next_id(self, index, num):
-        print(f"num: {num} | curr next id: {self.next_ids[index]}")
         if num >= self.next_ids[index]:
             self.next_ids[index] = num + 1
 
     def load_object_files_on_init(self):
-        dir_list = [donors_dir, items_dir, buyers_dir]
+        def get_field_from_json(json, key):
+            return json[key] if key in json else ""
+
+        dir_list = [donors_dir, buyers_dir, items_dir]
+        object_str_to_class = {
+            "Donor":    ObjectType.DONOR,
+            "Item":     ObjectType.ITEM,
+            "Buyer":    ObjectType.BUYER
+        }
         for dir in dir_list:
             for file in Path(dir).glob("*.json"):
                 with open(file) as f:
                     object_json = json.load(f)
-                    object = None
-                    if object_json["class"] == "Donor":
-                        object = Donor(
-                            object_json["id"],
-                            object_json["name"],
-                            object_json["address"],
-                            object_json["items"],
-                        )
-                        self.object_list[0][object_json["id"]] = object
-                        self.set_next_id(0, int(object_json["id"]))
-                    elif object_json["class"] == "Item":
-                        object = Item(
-                            object_json["id"],
-                            object_json["name"],
-                            object_json["donor"],
-                            object_json["starting_price"],
-                            object_json["buyer"],
-                            object_json["ending_price"],
-                        )
-                        self.object_list[1][object_json["id"]] = object
-                        self.set_next_id(1, int(object_json["id"]))
-                    elif object_json["class"] == "Buyer":
-                        object = Buyer(
-                            object_json["id"],
-                            object_json["name"],
-                            object_json["address"],
-                            object_json["items"],
-                        )
-                        self.object_list[2][object_json["id"]] = object
-                        self.set_next_id(2, int(object_json["id"]))
-                    
+                    object_type = object_str_to_class[object_json["class"]]
+                    self.create_object(object_type,
+                                        id=get_field_from_json(object_json, "id"),
+                                        name=get_field_from_json(object_json, "name"),
+                                        address=get_field_from_json(object_json, "address"),
+                                        donor=get_field_from_json(object_json, "donor"),
+                                        starting_price=get_field_from_json(object_json, "starting_price"),
+                                        buyer=get_field_from_json(object_json, "buyer"),
+                                        ending_price=get_field_from_json(object_json, "ending_price")
+                                        )
+
         for i in range(0, 3):
             self.object_list[i] = {
                 k: v

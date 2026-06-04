@@ -42,6 +42,8 @@ class Object:
         for key in self.REQUIRED:
             if key in kwargs:
                 setattr(self, key, kwargs[key])
+        if isinstance(self, Item):
+            pass
 
     def delete(self):
         directory = self.get_dir()
@@ -59,16 +61,14 @@ class Object:
             print("Unrecognized object trying to save")
             return None
 
-class Donor(Object):
-    REQUIRED = ["id", "name", "address"]
-
+class People(Object):
     def __init__(self, id, name, address, items=[]):
         super().__init__(id, name)
         self.address = address
         self.items = items
 
     def __str__(self):
-        return f"ID: {self.id}, Name: {self.name}, Address: {self.address}"
+        return f"ID: {self.id}, Name: {self.name}, Address: {self.address}, Items: {self.items}"
 
     def to_dict(self):
         data = super().to_dict()
@@ -78,9 +78,21 @@ class Donor(Object):
         })
         return data
 
+    def add_item(self, item_id):
+        self.items = self.items + [item_id]
+        self.items.sort(key=int)
+
+    def remove_item(self, item_id):
+        self.items.remove(item_id)
+
+class Donor(People):
+    REQUIRED = ["id", "name", "address"]
+
+    def __init__(self, id, name, address, items=[]):
+        super().__init__(id, name, address, items)
+
     def from_dict(self, data):
         return Donor(data["id"], data["name"], data["address"], data["items"])
-
 
 class Item(Object):
     REQUIRED = ["id", "name", "donor", "starting_price", "buyer", "ending_price"]
@@ -108,24 +120,11 @@ class Item(Object):
     def from_dict(self, data):
         return Donor(data["id"], data["name"], data["address"], data["items"])
 
-class Buyer(Object):
+class Buyer(People):
     REQUIRED = ["id", "name", "address"]
 
     def __init__(self, id, name, address, items=[]):
-        super().__init__(id, name)
-        self.address = address
-        self.items = items
-
-    def __str__(self):
-        return f"ID: {self.id}, Name: {self.name}, Address: {self.address}"
-
-    def to_dict(self):
-        data = super().to_dict()
-        data.update({
-            "address": self.address,
-            "items": self.items
-        })
-        return data
+        super().__init__(id, name, address, items)
 
     def from_dict(self, data):
-        return Donor(data["id"], data["name"], data["address"], data["items"])
+        return Buyer(data["id"], data["name"], data["address"], data["items"])
