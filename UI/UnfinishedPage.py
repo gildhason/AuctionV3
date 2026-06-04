@@ -17,3 +17,6 @@ class UnfinishedPage(tk.Frame):
 
         label.grid(row=0, column=0, padx=10, pady=10)
         back_button.grid(row=1, column=0, padx=10, pady=10)
+    
+    def refresh(self):
+        pass

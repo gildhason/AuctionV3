@@ -3,6 +3,7 @@ import os
 import traceback
 
 from globals import donors_dir, items_dir, buyers_dir
+from globals import ObjectType
 
 class Object:
     def __init__(self, id, name):
@@ -81,9 +82,11 @@ class People(Object):
     def add_item(self, item_id):
         self.items = self.items + [item_id]
         self.items.sort(key=int)
+        self.save()
 
     def remove_item(self, item_id):
         self.items.remove(item_id)
+        self.save()
 
 class Donor(People):
     REQUIRED = ["id", "name", "address"]
@@ -119,6 +122,13 @@ class Item(Object):
 
     def from_dict(self, data):
         return Donor(data["id"], data["name"], data["address"], data["items"])
+
+    def remove_person(self, person_type, person_id):
+        if person_type == ObjectType.DONOR:
+            self.donor = ""
+        elif person_type == ObjectType.BUYER:
+            self.buyer = ""
+        self.save()
 
 class Buyer(People):
     REQUIRED = ["id", "name", "address"]

@@ -34,22 +34,16 @@ class AllData:
         item_id = item.id
         donor_id = item.donor
         buyer_id = item.buyer
-        for buyer in self.object_list[2]:
-            print(f"Buyer: {self.object_list[2][buyer]}")
         if old_donor_id != "" and old_donor_id != donor_id:
-            self.object_list[ObjectType.DONOR.value][donor_id].remove_item(item_id)
+            self.object_list[ObjectType.DONOR.value][old_donor_id].remove_item(item_id)
         if old_buyer_id != "" and old_buyer_id != buyer_id:
-            self.object_list[ObjectType.BUYER.value][buyer_id].remove_item(item_id)
+            self.object_list[ObjectType.BUYER.value][old_buyer_id].remove_item(item_id)
         if donor_id != "" and item_id not in self.object_list[ObjectType.DONOR.value][donor_id].items:
             self.object_list[ObjectType.DONOR.value][donor_id].add_item(item_id)
             self.object_list[ObjectType.DONOR.value][donor_id].save()
         if buyer_id != "" and item_id not in self.object_list[ObjectType.BUYER.value][buyer_id].items:
             self.object_list[ObjectType.BUYER.value][buyer_id].add_item(item_id)
             self.object_list[ObjectType.BUYER.value][buyer_id].save()
-        print(f"Item ID: {item_id}")
-        for buyer in self.object_list[2]:
-            print(self.object_list[2][buyer])
-        print("")
 
     def create_object(self, entity_type, **kwargs):
         cls = self.class_list[entity_type.value]
@@ -58,7 +52,6 @@ class AllData:
         self.object_list[entity_type.value][kwargs["id"]] = object
         self.set_next_id(entity_type.value, int(object.id))
         object.save()
-        print(object)
         if entity_type == ObjectType.ITEM:
             self.update_people(object)
         return object
@@ -77,6 +70,21 @@ class AllData:
 
     def delete_object(self, entity_type, idIn):
         object = self.object_list[entity_type.value][idIn]
+        if entity_type == ObjectType.DONOR:
+            items = object.items
+            for item_id in items:
+                self.object_list[ObjectType.ITEM.value][item_id].remove_person(ObjectType.DONOR, idIn)
+        elif entity_type == ObjectType.ITEM:
+            donor_id = object.donor
+            buyer_id = object.buyer
+            if donor_id != "":
+                self.object_list[ObjectType.DONOR.value][donor_id].remove_item(idIn)
+            if buyer_id != "":
+                self.object_list[ObjectType.BUYER.value][buyer_id].remove_item(idIn)
+        elif entity_type == ObjectType.BUYER:
+            items = object.items
+            for item_id in items:
+                self.object_list[ObjectType.ITEM.value][item_id].remove_person(ObjectType.BUYER, idIn)
         object.delete()
         del self.object_list[entity_type.value][idIn]
 

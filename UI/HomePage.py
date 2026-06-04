@@ -29,3 +29,6 @@ class HomePage(tk.Frame):
         items_button        .grid(row=1, column=1,                  padx=10,    pady=10, sticky="nsew")
         bidders_button      .grid(row=2, column=0,                  padx=10,    pady=10, sticky="nsew")
         receipts_button     .grid(row=2, column=1,                  padx=10,    pady=10, sticky="nsew")
+
+    def refresh(self):
+        pass

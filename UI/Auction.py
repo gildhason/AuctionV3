@@ -52,15 +52,12 @@ class Auction(tk.Tk):
         self.frames["BuyersPage"] = page
         page.grid(row = 0, column = 0, sticky = "nsew")
 
-        self.frames["DonorsPage"].update_objects()
-        self.frames["ItemsPage"].update_objects()
-        self.frames["BuyersPage"].update_objects()
-
         self.show_frame("HomePage")
 
     def show_frame(self, destPageName):
         self.nav.navigate(destPageName)
         frame = self.frames[destPageName]
+        frame.refresh()
         frame.tkraise()
 
     def go_back(self):

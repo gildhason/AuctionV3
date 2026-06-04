@@ -252,6 +252,9 @@ class ObjectsPage(tk.Frame):
             back_button.grid(row=5, column=0, padx=10, pady=10, sticky="ew")
             self.object_treeview.grid(row=1, column=1, rowspan=5, padx=10, pady=10, sticky="nsew")
 
+    def refresh(self):
+        self.update_objects()
+
     def update_objects(self):
         for row in self.object_treeview.get_children():
             self.object_treeview.delete(row)
