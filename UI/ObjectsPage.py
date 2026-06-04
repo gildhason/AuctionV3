@@ -274,10 +274,8 @@ class ObjectsPage(tk.Frame):
                                                     buyer_str,
                                                     this_object.ending_price))
 
-        if self.type == ObjectType.DONOR:
-            self.controller.frames["ItemsPage"].mod_frame.donor_combo["values"] = [f"{id}: {donor.name}" for id, donor in self.controller.all_data.object_list[ObjectType.DONOR.value].items()]
-        elif self.type == ObjectType.BUYER:
-            self.controller.frames["ItemsPage"].mod_frame.buyer_combo["values"] = [f"{id}: {buyer.name}" for id, buyer in self.controller.all_data.object_list[ObjectType.BUYER.value].items()]
+        self.controller.frames["ItemsPage"].mod_frame.donor_combo["values"] = [f"{id}: {donor.name}" for id, donor in self.controller.all_data.object_list[ObjectType.DONOR.value].items()]
+        self.controller.frames["ItemsPage"].mod_frame.buyer_combo["values"] = [f"{id}: {buyer.name}" for id, buyer in self.controller.all_data.object_list[ObjectType.BUYER.value].items()]
 
     def delete_object(self):
         selection = self.object_treeview.selection()
