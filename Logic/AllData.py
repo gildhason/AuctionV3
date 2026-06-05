@@ -105,6 +105,17 @@ class AllData:
             if num >= self.next_ids[object_type.value]:
                 self.next_ids[object_type.value] = num + 1
 
+    def get_amount_owed(self, buyer):
+        items_bought = buyer.items
+        amt = 0
+        for item_id in items_bought:
+            price = self.object_list[ObjectType.ITEM.value][item_id].ending_price
+            if price == "":
+                continue
+            else:
+                amt += int(price)
+        return amt
+
     def load_object_files_on_init(self):
         def get_field_from_json(json, key):
             return json[key] if key in json else ""

@@ -190,10 +190,12 @@ class ObjectsPage(tk.Frame):
         self.nav = nav
 
         treeview_columns = None
-        if self.type == ObjectType.ITEM:
-            treeview_columns = ("ID", "Name", "Donor", "Starting Price", "Buyer", "Ending Price")
-        else:
+        if self.type == ObjectType.DONOR:
             treeview_columns = ("ID", "Name", "Address", "Items")
+        elif self.type == ObjectType.ITEM:
+            treeview_columns = ("ID", "Name", "Donor", "Starting Price", "Buyer", "Ending Price")
+        elif self.type == ObjectType.BUYER:
+            treeview_columns = ("ID", "Name", "Address", "Items", "Amount Owed")
 
         self.person_type_label = self.type.name.capitalize()
 
@@ -209,6 +211,15 @@ class ObjectsPage(tk.Frame):
         self.object_treeview = ttk.Treeview(self, columns=treeview_columns, show="headings")
         self.object_treeview.bind("<<TreeviewSelect>>", self.on_tree_click)
 
+        if self.type == ObjectType.DONOR:
+            self.object_treeview.heading("ID", text="ID")
+            self.object_treeview.column("ID", width=50, anchor="center")
+            self.object_treeview.heading("Name", text="Name")
+            self.object_treeview.column("Name", width=100, anchor="center")
+            self.object_treeview.heading("Address", text="Address")
+            self.object_treeview.column("Address", width=150, anchor="center")
+            self.object_treeview.heading("Items", text=f"Items {determine_donated_or_bought(self.type)}")
+            self.object_treeview.column("Items", width=100, anchor="center")
         if self.type == ObjectType.ITEM:
             self.object_treeview.heading("ID", text="ID")
             self.object_treeview.column("ID", width=50, anchor="center")
@@ -222,7 +233,7 @@ class ObjectsPage(tk.Frame):
             self.object_treeview.column("Buyer", width=150, anchor="center")
             self.object_treeview.heading("Ending Price", text=f"Ending Price")
             self.object_treeview.column("Ending Price", width=100, anchor="center")
-        else:
+        if self.type == ObjectType.BUYER:
             self.object_treeview.heading("ID", text="ID")
             self.object_treeview.column("ID", width=50, anchor="center")
             self.object_treeview.heading("Name", text="Name")
@@ -231,6 +242,8 @@ class ObjectsPage(tk.Frame):
             self.object_treeview.column("Address", width=150, anchor="center")
             self.object_treeview.heading("Items", text=f"Items {determine_donated_or_bought(self.type)}")
             self.object_treeview.column("Items", width=100, anchor="center")
+            self.object_treeview.heading("Amount Owed", text=f"Amount Owed")
+            self.object_treeview.column("Amount Owed", width=100, anchor="center")
 
         self.grid_rowconfigure(0, weight=1)
         self.grid_rowconfigure(1, weight=1)
@@ -263,19 +276,14 @@ class ObjectsPage(tk.Frame):
             self.object_treeview.delete(row)
         for object in self.controller.all_data.object_list[self.type.value]:
             this_object = self.controller.all_data.object_list[self.type.value][object]
-            if self.type != ObjectType.ITEM:
+            if self.type == ObjectType.DONOR:
                 self.object_treeview.insert("", tk.END, values=(this_object.id, this_object.name, this_object.address, ", ".join(this_object.items)))
-            else:
+            elif self.type == ObjectType.ITEM:
                 donor_str = "" if this_object.donor == "" else f"{this_object.donor}: {self.controller.all_data.object_list[ObjectType.DONOR.value][this_object.donor].name}"
                 buyer_str = "" if this_object.buyer == "" else f"{this_object.buyer}: {self.controller.all_data.object_list[ObjectType.BUYER.value][this_object.buyer].name}"
-                self.object_treeview.insert("",
-                                            tk.END,
-                                            values=(this_object.id,
-                                                    this_object.name,
-                                                    donor_str,
-                                                    this_object.starting_price,
-                                                    buyer_str,
-                                                    this_object.ending_price))
+                self.object_treeview.insert("", tk.END, values=(this_object.id, this_object.name, donor_str, this_object.starting_price, buyer_str, this_object.ending_price))
+            if self.type == ObjectType.BUYER:
+                self.object_treeview.insert("", tk.END, values=(this_object.id, this_object.name, this_object.address, ", ".join(this_object.items), self.controller.all_data.get_amount_owed(this_object)))
 
         self.controller.frames["ItemsPage"].mod_frame.donor_combo["values"] = [f"{id}: {donor.name}" for id, donor in self.controller.all_data.object_list[ObjectType.DONOR.value].items()]
         self.controller.frames["ItemsPage"].mod_frame.buyer_combo["values"] = [f"{id}: {buyer.name}" for id, buyer in self.controller.all_data.object_list[ObjectType.BUYER.value].items()]
