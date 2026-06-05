@@ -50,10 +50,15 @@ class AllData:
         params = {key: kwargs[key] for key in cls.REQUIRED}
         object = cls(**params)
         self.object_list[entity_type.value][kwargs["id"]] = object
-        self.set_next_id(entity_type.value, int(object.id))
+        self.set_next_id(entity_type, int(object.id))
         object.save()
         if entity_type == ObjectType.ITEM:
             self.update_people(object)
+        if entity_type == ObjectType.BUYER:
+            self.object_list[ObjectType.BUYER.value] = {
+                k: v
+                for k, v in sorted(self.object_list[ObjectType.BUYER.value].items(), key=lambda item: int(item[0]))
+            }
         return object
 
     def edit_object(self, entity_type, **kwargs):
@@ -87,10 +92,18 @@ class AllData:
                 self.object_list[ObjectType.ITEM.value][item_id].remove_person(ObjectType.BUYER, idIn)
         object.delete()
         del self.object_list[entity_type.value][idIn]
+        if entity_type == ObjectType.BUYER:
+            self.set_next_id(entity_type, 0)
 
-    def set_next_id(self, index, num):
-        if num >= self.next_ids[index]:
-            self.next_ids[index] = num + 1
+    def set_next_id(self, object_type, num):
+        if object_type == ObjectType.BUYER:
+            next_id = 1
+            while str(next_id) in self.object_list[ObjectType.BUYER.value]:
+                next_id += 1
+            self.next_ids[object_type.value] = next_id
+        else: 
+            if num >= self.next_ids[object_type.value]:
+                self.next_ids[object_type.value] = num + 1
 
     def load_object_files_on_init(self):
         def get_field_from_json(json, key):

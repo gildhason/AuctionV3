@@ -59,7 +59,7 @@ class ModPersonForm(tk.Frame):
         starting_price_label = ttk.Label(self, text="Starting Price")
         buyer_label = ttk.Label(self, text="Buyer")
         ending_price_label = ttk.Label(self, text="Ending Price")
-        ID_entry = tk.Entry(self, textvariable=self.next_id, state="readonly")
+        ID_entry = tk.Entry(self, textvariable=self.next_id, state="normal" if self.type == ObjectType.BUYER else "readonly")
         self.name_entry = ttk.Entry(self, textvariable=self.name_var)
         self.address_entry = ttk.Entry(self, textvariable=self.address_var)
         self.donor_combo = ttk.Combobox(self, textvariable=self.donor_var, values=ModPersonForm.donor_list)
@@ -123,11 +123,14 @@ class ModPersonForm(tk.Frame):
 
     def commit_action(self):
         if self.mode == "ADD":
+            if self.next_id.get() == "":
+                return
             if self.type != ObjectType.ITEM:
                 if self.name_var.get() == "" or self.address_var.get() == "":
                     return
+                if self.type == ObjectType.BUYER and self.next_id.get() in self.controller.all_data.object_list[ObjectType.BUYER.value].keys():
+                    return
             else:
-                # if self.name_var.get() == "" or self.donor_var.get() == "" or self.starting_price_var.get() == "":
                 if self.name_var.get() == "":
                     return
 
@@ -285,6 +288,8 @@ class ObjectsPage(tk.Frame):
         object_id = self.object_treeview.item(selection[0], "values")[0]
         self.controller.all_data.delete_object(self.type, object_id)
         self.mod_frame.set_fields_on_parent_request(id="", name="", address="", donor="", starting_price="", buyer="", ending_price="")
+        if self.type == ObjectType.BUYER:
+            self.mod_frame.next_id.set(self.controller.all_data.next_ids[self.type.value])
         self.update_objects()
 
     def on_tree_click(self, event):
