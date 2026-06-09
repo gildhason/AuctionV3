@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 
 from globals import ObjectType
 from Logic.Classes import Donor
@@ -41,15 +41,7 @@ class ModObjectForm(tk.Frame):
         self.type = person_type
         self.person_type_label = person_type_label
         self.callback = callback
-        self.treeview_params = {
-            "id": "",
-            "name": "",
-            "address": "",
-            "donor": "",
-            "starting_price": "",
-            "buyer": "",
-            "ending_price": "",
-        }
+        self.treeview_params = self.empty_treeview_params()
 
         self.name_var = tk.StringVar()
         self.address_var = tk.StringVar()
@@ -152,19 +144,42 @@ class ModObjectForm(tk.Frame):
                 self.buyer_combo.delete(0, tk.END)
                 self.ending_price_entry.delete(0, tk.END)
         elif self.mode == "EDIT":
-            if self.next_id.get() == "": # Occurs when shifting from Add to Edit mode
+            if self.treeview_params["id"] == "": # Handles trying to edit after successfully editing something
                 return
+
             if self.type != ObjectType.ITEM:
                 if self.name_var.get() == "" or self.address_var.get() == "":
                     return
             else:
                 if self.name_var.get() == "":
                     return
+
+            if self.type == ObjectType.BUYER:
+                if self.next_id.get() != self.treeview_params["id"] and self.next_id.get() in self.controller.all_data.object_list[self.type.value]:
+                    messagebox.showwarning("Warning", "This ID already has data. ")
+                    return
+                if self.next_id.get() != self.treeview_params["id"] and self.next_id.get() not in self.controller.all_data.object_list[self.type.value]:
+                    self.controller.all_data.create_object(self.type, id=self.next_id.get(), name=self.name_var.get(), address=self.address_var.get(), donor=self.donor_var.get().split(":")[0], starting_price=self.starting_price_var.get(), buyer=self.buyer_var.get().split(":")[0], ending_price=self.ending_price_var.get())
+                    self.controller.all_data.delete_object(self.type, self.treeview_params["id"])
+
             self.controller.all_data.edit_object(self.type, id=self.next_id.get(), name=self.name_var.get(), address=self.address_var.get(), donor=self.donor_var.get().split(":")[0], starting_price=self.starting_price_var.get(), buyer=self.buyer_var.get().split(":")[0], ending_price=self.ending_price_var.get())
+            self.treeview_params = self.empty_treeview_params()
+            self.set_fields_on_request()
         else:
             pass
 
         self.callback()
+
+    def empty_treeview_params(self):
+        return {
+            "id": "", 
+            "name": "", 
+            "address": "", 
+            "donor": "", 
+            "starting_price": "", 
+            "buyer": "", 
+            "ending_price": "", 
+        }
 
     def set_fields_on_request(self):
         if self.mode == "EDIT":
