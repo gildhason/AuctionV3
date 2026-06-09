@@ -31,7 +31,7 @@ class AddOrEdit(tk.Frame):
         if self.callback:
             self.callback(self.mode.get())
 
-class ModPersonForm(tk.Frame):
+class ModObjectForm(tk.Frame):
     donor_list = []
     buyer_list = []
 
@@ -41,6 +41,15 @@ class ModPersonForm(tk.Frame):
         self.type = person_type
         self.person_type_label = person_type_label
         self.callback = callback
+        self.treeview_params = {
+            "id": "",
+            "name": "",
+            "address": "",
+            "donor": "",
+            "starting_price": "",
+            "buyer": "",
+            "ending_price": "",
+        }
 
         self.name_var = tk.StringVar()
         self.address_var = tk.StringVar()
@@ -62,9 +71,9 @@ class ModPersonForm(tk.Frame):
         ID_entry = tk.Entry(self, textvariable=self.next_id, state="normal" if self.type == ObjectType.BUYER else "readonly")
         self.name_entry = ttk.Entry(self, textvariable=self.name_var)
         self.address_entry = ttk.Entry(self, textvariable=self.address_var)
-        self.donor_combo = ttk.Combobox(self, textvariable=self.donor_var, values=ModPersonForm.donor_list)
+        self.donor_combo = ttk.Combobox(self, textvariable=self.donor_var, values=ModObjectForm.donor_list)
         self.starting_price_entry = ttk.Entry(self, textvariable=self.starting_price_var)
-        self.buyer_combo = ttk.Combobox(self, textvariable=self.buyer_var, values=ModPersonForm.buyer_list)
+        self.buyer_combo = ttk.Combobox(self, textvariable=self.buyer_var, values=ModObjectForm.buyer_list)
         self.ending_price_entry = ttk.Entry(self, textvariable=self.ending_price_var)
 
         self.grid_rowconfigure(0)
@@ -108,16 +117,14 @@ class ModPersonForm(tk.Frame):
         if modeIn == "ADD":
             self.next_id.set(self.controller.all_data.next_ids[self.type.value])
             self.name_entry.delete(0, tk.END)
-            if self.type != ObjectType.ITEM:
-                self.address_entry.delete(0, tk.END)
-            else:
-                self.donor_combo.delete(0, tk.END)
-                self.starting_price_entry.delete(0, tk.END)
-                self.buyer_combo.delete(0, tk.END)
-                self.ending_price_entry.delete(0, tk.END)
+            self.address_entry.delete(0, tk.END)
+            self.donor_combo.delete(0, tk.END)
+            self.starting_price_entry.delete(0, tk.END)
+            self.buyer_combo.delete(0, tk.END)
+            self.ending_price_entry.delete(0, tk.END)
             self.submit_button = ttk.Button(self, text=f"Add {self.person_type_label}", command=self.commit_action)
         elif modeIn == "EDIT":
-            self.next_id.set("")
+            self.set_fields_on_request()
             self.submit_button = ttk.Button(self, text=f"Edit {self.person_type_label}", command=self.commit_action)
         self.submit_button.grid(row=submit_button_row, column=0, columnspan=4, sticky="ew", padx=10, pady=10)
 
@@ -159,16 +166,16 @@ class ModPersonForm(tk.Frame):
 
         self.callback()
 
-    def set_fields_on_parent_request(self, **kwargs):
+    def set_fields_on_request(self):
         if self.mode == "EDIT":
-            if kwargs["id"] != "":
-                self.next_id.set(kwargs["id"])
-                self.name_var.set(kwargs["name"]) 
-                self.address_var.set(kwargs["address"]) 
-                self.donor_var.set(kwargs["donor"])
-                self.starting_price_var.set(kwargs["starting_price"])
-                self.buyer_var.set(kwargs["buyer"])
-                self.ending_price_var.set(kwargs["ending_price"])
+            if self.treeview_params["id"] != "":
+                self.next_id.set(self.treeview_params["id"])
+                self.name_var.set(self.treeview_params["name"]) 
+                self.address_var.set(self.treeview_params["address"]) 
+                self.donor_var.set(self.treeview_params["donor"])
+                self.starting_price_var.set(self.treeview_params["starting_price"])
+                self.buyer_var.set(self.treeview_params["buyer"])
+                self.ending_price_var.set(self.treeview_params["ending_price"])
             else:
                 self.next_id.set("")
                 self.name_entry.delete(0, tk.END)
@@ -201,7 +208,7 @@ class ObjectsPage(tk.Frame):
 
         label = ttk.Label(self, text=f"{self.person_type_label}s", font=("Arial", 16))
         label_frame = ttk.LabelFrame(self, text="Add/Edit", relief="ridge", borderwidth=3)
-        self.mod_frame = ModPersonForm(label_frame, controller, self.type, self.person_type_label, callback=self.update_objects)
+        self.mod_frame = ModObjectForm(label_frame, controller, self.type, self.person_type_label, callback=self.update_objects)
         self.mod_frame.pack()
 
         delete_button = ttk.Button(self, text=f"Delete {self.person_type_label}", command=self.delete_object)
@@ -295,7 +302,17 @@ class ObjectsPage(tk.Frame):
         
         object_id = self.object_treeview.item(selection[0], "values")[0]
         self.controller.all_data.delete_object(self.type, object_id)
-        self.mod_frame.set_fields_on_parent_request(id="", name="", address="", donor="", starting_price="", buyer="", ending_price="")
+        values_dict = {
+            "id": "",
+            "name": "",
+            "address": "",
+            "donor": "",
+            "starting_price": "",
+            "buyer": "",
+            "ending_price": "",
+        }
+        self.mod_frame.treeview_params = values_dict
+        self.mod_frame.set_fields_on_request()
         if self.type == ObjectType.BUYER:
             self.mod_frame.next_id.set(self.controller.all_data.next_ids[self.type.value])
         self.update_objects()
@@ -306,7 +323,27 @@ class ObjectsPage(tk.Frame):
             return
         
         values = self.object_treeview.item(selection[0], "values")
+        values_dict = {
+            "id": values[0],
+            "name": values[1]
+        }
         if self.type != ObjectType.ITEM:
-            self.mod_frame.set_fields_on_parent_request(id=values[0], name=values[1], address=values[2], donor="", starting_price="", buyer="", ending_price="")
+            values_dict.update({
+                "address": values[2],
+                "donor": "",
+                "starting_price": "",
+                "buyer": "",
+                "ending_price": "",
+            })
+            self.mod_frame.treeview_params = values_dict
+            self.mod_frame.set_fields_on_request()
         else:
-            self.mod_frame.set_fields_on_parent_request(id=values[0], name=values[1], address="", donor=values[2], starting_price=values[3], buyer=values[4], ending_price=values[5])
+            values_dict.update({
+                "address": "",
+                "donor": values[2],
+                "starting_price": values[3],
+                "buyer": values[4],
+                "ending_price": values[5]
+            })
+            self.mod_frame.treeview_params = values_dict
+            self.mod_frame.set_fields_on_request()
