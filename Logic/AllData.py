@@ -115,6 +115,8 @@ class AllData:
                 continue
             else:
                 amt += int(price)
+        if buyer.donation != "":
+            amt += int(buyer.donation)
         return amt
 
     def load_object_files_on_init(self):
@@ -139,7 +141,8 @@ class AllData:
                                         donor=get_field_from_json(object_json, "donor"),
                                         starting_price=get_field_from_json(object_json, "starting_price"),
                                         buyer=get_field_from_json(object_json, "buyer"),
-                                        ending_price=get_field_from_json(object_json, "ending_price")
+                                        ending_price=get_field_from_json(object_json, "ending_price"),
+                                        donation=get_field_from_json(object_json, "donation")
                                         )
 
         for i in range(0, 3):

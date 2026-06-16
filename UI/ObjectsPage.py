@@ -49,6 +49,7 @@ class ModObjectForm(tk.Frame):
         self.starting_price_var = tk.StringVar()
         self.buyer_var = tk.StringVar()
         self.ending_price_var = tk.StringVar()
+        self.donation_var = tk.StringVar()
 
         self.mode = None
 
@@ -60,6 +61,7 @@ class ModObjectForm(tk.Frame):
         starting_price_label = ttk.Label(self, text="Starting Price")
         buyer_label = ttk.Label(self, text="Buyer")
         ending_price_label = ttk.Label(self, text="Ending Price")
+        donation_label = ttk.Label(self, text="Donation")
         ID_entry = tk.Entry(self, textvariable=self.next_id, state="normal" if self.type == ObjectType.BUYER else "readonly")
         self.name_entry = ttk.Entry(self, textvariable=self.name_var)
         self.address_entry = ttk.Entry(self, textvariable=self.address_var)
@@ -67,6 +69,7 @@ class ModObjectForm(tk.Frame):
         self.starting_price_entry = ttk.Entry(self, textvariable=self.starting_price_var)
         self.buyer_combo = ttk.Combobox(self, textvariable=self.buyer_var, values=ModObjectForm.buyer_list)
         self.ending_price_entry = ttk.Entry(self, textvariable=self.ending_price_var)
+        self.donation_entry = ttk.Entry(self, textvariable=self.donation_var)
 
         self.grid_rowconfigure(0)
         self.grid_rowconfigure(1)
@@ -76,7 +79,7 @@ class ModObjectForm(tk.Frame):
         self.grid_columnconfigure(1)
         self.grid_columnconfigure(2)
         self.grid_columnconfigure(3)
-        if self.type == ObjectType.ITEM:
+        if self.type != ObjectType.DONOR:
             self.grid_rowconfigure(4)
 
         ID_label.grid(row=1, column=0, padx=10, pady=10)
@@ -86,6 +89,9 @@ class ModObjectForm(tk.Frame):
         if self.type != ObjectType.ITEM:
             address_label.grid(row=2, column=0, padx=10, pady=10)
             self.address_entry.grid(row=2, column=1, columnspan=3, sticky="ew", padx=10, pady=10)
+            if self.type == ObjectType.BUYER:
+                donation_label.grid(row=3, column=0, padx=10, pady=10)
+                self.donation_entry.grid(row=3, column=1, sticky="ew", padx=10, pady=10)
         else:
             donor_label.grid(row=2, column=0, padx=10, pady=10)
             self.donor_combo.grid(row=2, column=1, padx=10, pady=10)
@@ -105,7 +111,7 @@ class ModObjectForm(tk.Frame):
         if self.mode == modeIn:
             return
         self.mode = modeIn
-        submit_button_row = 3 if self.type != ObjectType.ITEM else 4
+        submit_button_row = 4 if self.type != ObjectType.DONOR else 3
         if modeIn == "ADD":
             self.next_id.set(self.controller.all_data.next_ids[self.type.value])
             self.name_entry.delete(0, tk.END)
@@ -133,7 +139,7 @@ class ModObjectForm(tk.Frame):
                 if self.name_var.get() == "":
                     return
 
-            self.controller.all_data.create_object(self.type, id=self.next_id.get(), name=self.name_var.get(), address=self.address_var.get(), donor=self.donor_var.get().split(":")[0], starting_price=self.starting_price_var.get(), buyer=self.buyer_var.get().split(":")[0], ending_price=self.ending_price_var.get())
+            self.controller.all_data.create_object(self.type, id=self.next_id.get(), name=self.name_var.get(), address=self.address_var.get(), donor=self.donor_var.get().split(":")[0], starting_price=self.starting_price_var.get(), buyer=self.buyer_var.get().split(":")[0], ending_price=self.ending_price_var.get(), donation=self.donation_var.get())
             self.next_id.set(self.controller.all_data.next_ids[self.type.value])
             self.name_entry.delete(0, tk.END)
             if self.type != ObjectType.ITEM:
@@ -143,6 +149,7 @@ class ModObjectForm(tk.Frame):
                 self.starting_price_entry.delete(0, tk.END)
                 self.buyer_combo.delete(0, tk.END)
                 self.ending_price_entry.delete(0, tk.END)
+                self.donation_entry.delete(0, tk.END)
         elif self.mode == "EDIT":
             if self.treeview_params["id"] == "": # Handles trying to edit after successfully editing something
                 return
@@ -159,10 +166,10 @@ class ModObjectForm(tk.Frame):
                     messagebox.showwarning("Warning", "This ID already has data. ")
                     return
                 if self.next_id.get() != self.treeview_params["id"] and self.next_id.get() not in self.controller.all_data.object_list[self.type.value]:
-                    self.controller.all_data.create_object(self.type, id=self.next_id.get(), name=self.name_var.get(), address=self.address_var.get(), donor=self.donor_var.get().split(":")[0], starting_price=self.starting_price_var.get(), buyer=self.buyer_var.get().split(":")[0], ending_price=self.ending_price_var.get())
+                    self.controller.all_data.create_object(self.type, id=self.next_id.get(), name=self.name_var.get(), address=self.address_var.get(), donor=self.donor_var.get().split(":")[0], starting_price=self.starting_price_var.get(), buyer=self.buyer_var.get().split(":")[0], ending_price=self.ending_price_var.get(), donation=self.donation_var.get())
                     self.controller.all_data.delete_object(self.type, self.treeview_params["id"])
 
-            self.controller.all_data.edit_object(self.type, id=self.next_id.get(), name=self.name_var.get(), address=self.address_var.get(), donor=self.donor_var.get().split(":")[0], starting_price=self.starting_price_var.get(), buyer=self.buyer_var.get().split(":")[0], ending_price=self.ending_price_var.get())
+            self.controller.all_data.edit_object(self.type, id=self.next_id.get(), name=self.name_var.get(), address=self.address_var.get(), donor=self.donor_var.get().split(":")[0], starting_price=self.starting_price_var.get(), buyer=self.buyer_var.get().split(":")[0], ending_price=self.ending_price_var.get(), donation=self.donation_var.get())
             self.treeview_params = self.empty_treeview_params()
             self.set_fields_on_request()
         else:
@@ -179,6 +186,7 @@ class ModObjectForm(tk.Frame):
             "starting_price": "", 
             "buyer": "", 
             "ending_price": "", 
+            "donation": "",
         }
 
     def set_fields_on_request(self):
@@ -191,6 +199,7 @@ class ModObjectForm(tk.Frame):
                 self.starting_price_var.set(self.treeview_params["starting_price"])
                 self.buyer_var.set(self.treeview_params["buyer"])
                 self.ending_price_var.set(self.treeview_params["ending_price"])
+                self.donation_var.set(self.treeview_params["donation"])
             else:
                 self.next_id.set("")
                 self.name_entry.delete(0, tk.END)
@@ -217,7 +226,7 @@ class ObjectsPage(tk.Frame):
         elif self.type == ObjectType.ITEM:
             treeview_columns = ("ID", "Name", "Donor", "Starting Price", "Buyer", "Ending Price")
         elif self.type == ObjectType.BUYER:
-            treeview_columns = ("ID", "Name", "Address", "Items", "Amount Owed")
+            treeview_columns = ("ID", "Name", "Address", "Items", "Donation", "Amount Owed")
 
         self.person_type_label = self.type.name.capitalize()
 
@@ -264,6 +273,8 @@ class ObjectsPage(tk.Frame):
             self.object_treeview.column("Address", width=150, anchor="center")
             self.object_treeview.heading("Items", text=f"Items {determine_donated_or_bought(self.type)}")
             self.object_treeview.column("Items", width=100, anchor="center")
+            self.object_treeview.heading("Donation", text=f"Donation")
+            self.object_treeview.column("Donation", width=100, anchor="center")
             self.object_treeview.heading("Amount Owed", text=f"Amount Owed")
             self.object_treeview.column("Amount Owed", width=100, anchor="center")
 
@@ -305,7 +316,7 @@ class ObjectsPage(tk.Frame):
                 buyer_str = "" if this_object.buyer == "" else f"{this_object.buyer}: {self.controller.all_data.object_list[ObjectType.BUYER.value][this_object.buyer].name}"
                 self.object_treeview.insert("", tk.END, values=(this_object.id, this_object.name, donor_str, this_object.starting_price, buyer_str, this_object.ending_price))
             if self.type == ObjectType.BUYER:
-                self.object_treeview.insert("", tk.END, values=(this_object.id, this_object.name, this_object.address, ", ".join(this_object.items), self.controller.all_data.get_amount_owed(this_object)))
+                self.object_treeview.insert("", tk.END, values=(this_object.id, this_object.name, this_object.address, ", ".join(this_object.items), this_object.donation, self.controller.all_data.get_amount_owed(this_object)))
 
         self.controller.frames["ItemsPage"].mod_frame.donor_combo["values"] = [f"{id}: {donor.name}" for id, donor in self.controller.all_data.object_list[ObjectType.DONOR.value].items()]
         self.controller.frames["ItemsPage"].mod_frame.buyer_combo["values"] = [f"{id}: {buyer.name}" for id, buyer in self.controller.all_data.object_list[ObjectType.BUYER.value].items()]
@@ -325,6 +336,7 @@ class ObjectsPage(tk.Frame):
             "starting_price": "",
             "buyer": "",
             "ending_price": "",
+            "donation": "",
         }
         self.mod_frame.treeview_params = values_dict
         self.mod_frame.set_fields_on_request()
@@ -349,7 +361,10 @@ class ObjectsPage(tk.Frame):
                 "starting_price": "",
                 "buyer": "",
                 "ending_price": "",
+                "donation": "",
             })
+            if self.type == ObjectType.BUYER:
+                values_dict["donation"] = values[4]
             self.mod_frame.treeview_params = values_dict
             self.mod_frame.set_fields_on_request()
         else:
@@ -358,7 +373,8 @@ class ObjectsPage(tk.Frame):
                 "donor": values[2],
                 "starting_price": values[3],
                 "buyer": values[4],
-                "ending_price": values[5]
+                "ending_price": values[5],
+                "donation": "",
             })
             self.mod_frame.treeview_params = values_dict
             self.mod_frame.set_fields_on_request()

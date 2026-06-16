@@ -131,10 +131,18 @@ class Item(Object):
         self.save()
 
 class Buyer(People):
-    REQUIRED = ["id", "name", "address"]
+    REQUIRED = ["id", "name", "address", "donation"]
 
-    def __init__(self, id, name, address, items=[]):
+    def __init__(self, id, name, address, donation, items=[]):
         super().__init__(id, name, address, items)
+        self.donation = donation
+
+    def to_dict(self):
+        data = super().to_dict()
+        data.update({
+            "donation": self.donation
+        })
+        return data
 
     def from_dict(self, data):
-        return Buyer(data["id"], data["name"], data["address"], data["items"])
+        return Buyer(data["id"], data["name"], data["address"], data["donation"], data["items"])
