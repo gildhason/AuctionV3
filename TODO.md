@@ -5,3 +5,5 @@
 - Implement home page stats
 - Implement speed mode
 - Is a person's address necessary? 
+- Require applicable fields to be int or float only
+- Organize functions better
