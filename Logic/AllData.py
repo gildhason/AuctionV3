@@ -59,7 +59,6 @@ class AllData:
                 k: v
                 for k, v in sorted(self.object_list[ObjectType.BUYER.value].items(), key=lambda item: int(item[0]))
             }
-        print(kwargs["id"])
         return object
 
     def edit_object(self, entity_type, **kwargs):

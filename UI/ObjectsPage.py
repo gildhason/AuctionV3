@@ -237,7 +237,7 @@ class ObjectsPage(tk.Frame):
 
         delete_button = ttk.Button(self, text=f"Delete {self.person_type_label}", command=self.delete_object)
         duplicate_button = ttk.Button(self, text=f"Duplicate {self.person_type_label}", command=self.delete_object)
-        speed_mode_button = ttk.Button(self, text=f"Enter Speed Mode", command=self.delete_object)
+        speed_mode_button = ttk.Button(self, text=f"Enter Speed Mode", command=lambda: parent.master.show_frame("SpeedMode"))
         back_button = ttk.Button(self, text="Back to Home", command=lambda: parent.master.go_back())
         self.object_treeview = ttk.Treeview(self, columns=treeview_columns, show="headings")
         self.object_treeview.bind("<<TreeviewSelect>>", self.on_tree_click)

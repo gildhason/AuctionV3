@@ -64,6 +64,7 @@ class Auction(tk.Tk):
         prev = self.nav.back()
         self.nav.current = prev
         self.frames[prev].tkraise()
+        self.frames[prev].refresh()
 
     def commit_action(self, object_type, treeview):
         pass
