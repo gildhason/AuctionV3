@@ -12,6 +12,8 @@ class SpeedMode(tk.Frame):
         self.buyer_var = tk.StringVar()
         self.ending_price_var = tk.StringVar()
 
+        self.confirm_result = None
+
         speed_mode_label = ttk.Label(self, text="Speed Mode", font=("Arial", 16))
         instructions_label = ttk.Label(self, text="Press submit button or enter key to submit")
 
@@ -56,11 +58,10 @@ class SpeedMode(tk.Frame):
         self.ending_price_entry.delete(0, tk.END)
 
     def submit_changes(self):
-        def perform_checks(item_id, buyer_id, ending_price):
+        def check_if_ids_are_present(item_id, buyer_id, ending_price):
             ret = True
             ret = ret & (item_id in self.controller.all_data.object_list[ObjectType.ITEM.value])
             ret = ret & (buyer_id in self.controller.all_data.object_list[ObjectType.BUYER.value])
-            ret = ret & (self.controller.all_data.object_list[ObjectType.ITEM.value][item_id].buyer == "")
             return ret
 
         item_id = self.item_var.get()
@@ -70,9 +71,50 @@ class SpeedMode(tk.Frame):
             messagebox.showwarning("Warning", "All fields must be non-empty") 
             return
 
-        if perform_checks(item_id, buyer_id, ending_price):
-            self.controller.all_data.edit_object(ObjectType.ITEM, id=item_id, buyer=buyer_id, ending_price=ending_price)
+        if check_if_ids_are_present(item_id, buyer_id, ending_price):
+            if self.controller.all_data.object_list[ObjectType.ITEM.value][item_id].buyer == "":
+                self.controller.all_data.edit_object(ObjectType.ITEM, id=item_id, buyer=buyer_id, ending_price=ending_price)
+            else:
+                confirm = PopupMessage(self, "This item already has data entered. Are you sure you want to edit the data? ", self.get_confirmation)
+                if self.confirm_result:
+                    self.controller.all_data.edit_object(ObjectType.ITEM, id=item_id, buyer=buyer_id, ending_price=ending_price)
+                else:
+                    pass
+                    
+            self.refresh()
         else:
-            print(self.controller.all_data.object_list[ObjectType.ITEM.value][item_id])
-            messagebox.showwarning("Warning", "This item already has buyer and ending price data. Use Items page to edit this item. ") 
-        self.refresh()
+            messagebox.showwarning("Warning", "Check that item and buyer IDs exist. ")
+
+    def get_confirmation(self, result):
+        self.confirm_result = result 
+
+class PopupMessage(tk.Toplevel):
+    def __init__(self, parent, message, callback):
+        super().__init__(parent)
+        self.callback = callback
+
+        self.title("Confirm")
+        message_label = ttk.Label(self, text=message)
+        self.no_button = ttk.Button(self, text="No", command=self.no)
+        self.yes_button = ttk.Button(self, text="Yes", command=self.yes)
+
+        self.grid_rowconfigure(0)
+        self.grid_rowconfigure(1)
+        self.grid_columnconfigure(0)
+        self.grid_columnconfigure(1)
+
+        message_label.grid(row=0, column=0, columnspan=2, padx=10, pady=10)
+        self.no_button.grid(row=1, column=0, padx=10, pady=10)
+        self.yes_button.grid(row=1, column=1, padx=10, pady=10)
+
+        self.transient(parent)
+        self.grab_set()
+        parent.wait_window(self)
+
+    def no(self):
+        self.callback(False)
+        self.destroy()
+
+    def yes(self):
+        self.callback(True)
+        self.destroy()
