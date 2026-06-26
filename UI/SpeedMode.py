@@ -52,6 +52,8 @@ class SpeedMode(tk.Frame):
         self.submit_button.grid(row=3, column=0, columnspan=3, padx=10, pady=10, sticky="nsew")
         self.back_button.grid(row=3, column=3, columnspan=3, padx=10, pady=10, sticky="nsew")
 
+        self.bind_all("<Return>", lambda event: self.submit_changes())
+
     def refresh(self):
         self.item_entry.delete(0, tk.END)
         self.buyer_entry.delete(0, tk.END)
