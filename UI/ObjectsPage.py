@@ -191,7 +191,7 @@ class ModObjectForm(tk.Frame):
 
     def set_fields_on_request(self):
         if self.mode == "EDIT":
-            if self.treeview_params["id"] != "":
+            if self.treeview_params["id"] != "": # Occurs when a treeview object has been clicked on
                 self.next_id.set(self.treeview_params["id"])
                 self.name_var.set(self.treeview_params["name"]) 
                 self.address_var.set(self.treeview_params["address"]) 
@@ -201,9 +201,14 @@ class ModObjectForm(tk.Frame):
                 self.ending_price_var.set(self.treeview_params["ending_price"])
                 self.donation_var.set(self.treeview_params["donation"])
             else:
-                self.next_id.set("")
+                self.next_id.set("") # Occurs when an edit has been successful and maybe in another unknown situation
                 self.name_entry.delete(0, tk.END)
                 self.address_entry.delete(0, tk.END)
+                self.donor_combo.delete(0, tk.END)
+                self.starting_price_entry.delete(0, tk.END)
+                self.buyer_combo.delete(0, tk.END)
+                self.ending_price_entry.delete(0, tk.END)
+                self.donation_entry.delete(0, tk.END)
 
 class ObjectsPage(tk.Frame):
     def __init__(self, parent, controller, person_type, nav):
