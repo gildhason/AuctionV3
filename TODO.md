@@ -6,4 +6,3 @@
 - Make addresses optional
 - Require applicable fields to be int or float only
 - Organize functions better
-- Upon successful edit, the ID and name disappear for items. What is the expected behavior? (For buyers, donation does not go away)
