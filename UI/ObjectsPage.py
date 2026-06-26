@@ -131,7 +131,7 @@ class ModObjectForm(tk.Frame):
             if self.next_id.get() == "":
                 return
             if self.type != ObjectType.ITEM:
-                if self.name_var.get() == "" or self.address_var.get() == "":
+                if self.name_var.get() == "":
                     return
                 if self.type == ObjectType.BUYER and self.next_id.get() in self.controller.all_data.object_list[ObjectType.BUYER.value].keys():
                     return
@@ -155,7 +155,7 @@ class ModObjectForm(tk.Frame):
                 return
 
             if self.type != ObjectType.ITEM:
-                if self.name_var.get() == "" or self.address_var.get() == "":
+                if self.name_var.get() == "":
                     return
             else:
                 if self.name_var.get() == "":
