@@ -121,7 +121,7 @@ class Item(Object):
         return data
 
     def from_dict(self, data):
-        return Donor(data["id"], data["name"], data["address"], data["items"])
+        return Item(data["id"], data["name"], data["address"], data["items"])
 
     def remove_person(self, person_type, person_id):
         if person_type == ObjectType.DONOR:
