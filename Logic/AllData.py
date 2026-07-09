@@ -58,7 +58,7 @@ class AllData:
             self.object_list[ObjectType.BUYER.value][buyer_id].add_item(item_id)
             self.object_list[ObjectType.BUYER.value][buyer_id].save()
 
-    def eval_all_params(self, entity_type, action, **kwargs):
+    def eval_all_params(self, entity_type, action, buyer_id_edited=False, **kwargs):
         def dollar_is_valid(dec_str):
             try:
                 price_dec = Decimal(dec_str)
@@ -77,7 +77,7 @@ class AllData:
         try:
             id_int = int(kwargs["id"])
             if id_int < 1:
-                raise Exception # Will this work? 
+                raise Exception 
         except:
             retvals.append(self.ObjectOpRet.ID_INVALID)
         if kwargs["name"] == "":
@@ -94,6 +94,8 @@ class AllData:
         if entity_type == ObjectType.BUYER:
             if self.ObjectOpRet.ID_INVALID not in retvals and kwargs["id"] in self.object_list[ObjectType.BUYER.value] and action == "CREATE":
                 retvals.append(self.ObjectOpRet.TRIED_ADDING_EXISTING_BUYER)
+            if self.ObjectOpRet.ID_INVALID not in retvals and kwargs["id"] in self.object_list[ObjectType.BUYER.value] and buyer_id_edited:
+                retvals.append(self.ObjectOpRet.TRIED_EDITING_ID_TO_EXISTING_BUYER  )
             if kwargs["donation"] != "":
                 if not dollar_is_valid(kwargs["donation"]): 
                     retvals.append(self.ObjectOpRet.DONATION_INVALID)
@@ -123,8 +125,8 @@ class AllData:
             }
         return [self.ObjectOpRet.OP_SUCCESS]
 
-    def edit_object(self, entity_type, edit_buyer_id=False, **kwargs):
-        retvals = self.eval_all_params(entity_type, "EDIT", **kwargs)
+    def edit_object(self, entity_type, id_edited, **kwargs):
+        retvals = self.eval_all_params(entity_type, "EDIT", id_edited, **kwargs)
         if retvals:
             return retvals
 
