@@ -1,4 +1,5 @@
-from enum import Enum
+from decimal import Decimal
+from enum import Enum, auto
 import json
 import os
 from os import listdir
@@ -20,6 +21,18 @@ class AllData:
         self.next_ids = [1, 1, 1]
         self.load_object_files_on_init()
 
+    class ObjectOpRet(Enum):
+        OP_SUCCESS                          = auto()
+        ID_MISSING                          = auto() 
+        NAME_MISSING                        = auto()
+        TRIED_ADDING_EXISTING_BUYER         = auto()
+        TRIED_EDITING_ID_TO_EXISTING_BUYER  = auto()
+        ID_INVALID                          = auto()
+        STARTING_PRICE_INVALID              = auto()
+        ENDING_PRICE_INVALID                = auto()
+        DONATION_INVALID                    = auto()
+        BUYER_DOES_NOT_EXIST                = auto()
+        
     def convert_id_to_file_id(self, idIn, int_to_str):
         if int_to_str:
             id_str = str(idIn)
@@ -45,7 +58,56 @@ class AllData:
             self.object_list[ObjectType.BUYER.value][buyer_id].add_item(item_id)
             self.object_list[ObjectType.BUYER.value][buyer_id].save()
 
+    def eval_all_params(self, entity_type, action, **kwargs):
+        def dollar_is_valid(dec_str):
+            try:
+                price_dec = Decimal(dec_str)
+                if price_dec < 0:
+                    raise Exception
+                # if price_dec.as_tuple.exponent <= 2:
+                #     raise Exception
+                # print("Decimal place passed")
+                return True
+            except:
+                return False
+                
+        retvals = []
+        if kwargs["id"] == "":
+            retvals.append(self.ObjectOpRet.ID_MISSING)
+        try:
+            id_int = int(kwargs["id"])
+            if id_int < 1:
+                raise Exception # Will this work? 
+        except:
+            retvals.append(self.ObjectOpRet.ID_INVALID)
+        if kwargs["name"] == "":
+            retvals.append(self.ObjectOpRet.NAME_MISSING)
+        if entity_type == ObjectType.ITEM:
+            if kwargs["starting_price"] != "":
+                if not dollar_is_valid(kwargs["starting_price"]): 
+                    retvals.append(self.ObjectOpRet.STARTING_PRICE_INVALID)
+            if kwargs["ending_price"] != "":
+                if not dollar_is_valid(kwargs["ending_price"]):
+                    retvals.append(self.ObjectOpRet.ENDING_PRICE_INVALID)
+            if kwargs["buyer"] != "" and kwargs["buyer"] not in self.object_list[ObjectType.BUYER.value]:
+                retvals.append(self.ObjectOpRet.BUYER_DOES_NOT_EXIST)
+        if entity_type == ObjectType.BUYER:
+            if self.ObjectOpRet.ID_INVALID not in retvals and kwargs["id"] in self.object_list[ObjectType.BUYER.value] and action == "CREATE":
+                retvals.append(self.ObjectOpRet.TRIED_ADDING_EXISTING_BUYER)
+            if kwargs["donation"] != "":
+                if not dollar_is_valid(kwargs["donation"]): 
+                    retvals.append(self.ObjectOpRet.DONATION_INVALID)
+        if action == "EDIT":
+            pass
+
+        return retvals
+
     def create_object(self, entity_type, **kwargs):
+        retvals = self.eval_all_params(entity_type, "CREATE", **kwargs)
+        print(f"Type: {entity_type} | {retvals}")
+        if retvals:
+            return retvals
+
         cls = self.class_list[entity_type.value]
         params = {key: kwargs[key] for key in cls.REQUIRED}
         object = cls(**params)
@@ -59,9 +121,13 @@ class AllData:
                 k: v
                 for k, v in sorted(self.object_list[ObjectType.BUYER.value].items(), key=lambda item: int(item[0]))
             }
-        return object
+        return [self.ObjectOpRet.OP_SUCCESS]
 
-    def edit_object(self, entity_type, **kwargs):
+    def edit_object(self, entity_type, edit_buyer_id=False, **kwargs):
+        retvals = self.eval_all_params(entity_type, "EDIT", **kwargs)
+        if retvals:
+            return retvals
+
         old_donor_id = None
         old_buyer_id = None
         if entity_type == ObjectType.ITEM:
@@ -72,6 +138,7 @@ class AllData:
         object.save()
         if entity_type == ObjectType.ITEM:
             self.update_people(object, old_donor_id, old_buyer_id)
+        return [self.ObjectOpRet.OP_SUCCESS]
 
     def delete_object(self, entity_type, idIn):
         object = self.object_list[entity_type.value][idIn]

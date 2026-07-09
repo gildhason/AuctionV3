@@ -126,20 +126,47 @@ class ModObjectForm(tk.Frame):
             self.submit_button = ttk.Button(self, text=f"Edit {self.person_type_label}", command=self.commit_action)
         self.submit_button.grid(row=submit_button_row, column=0, columnspan=4, sticky="ew", padx=10, pady=10)
 
+    def display_warnings(self, retvals):
+        ObjectOpRet = self.controller.all_data.ObjectOpRet
+        warnings = []
+        if ObjectOpRet.ID_MISSING in retvals:
+            warnings.append("ID must not be missing. ")
+        elif ObjectOpRet.ID_INVALID in retvals: # If ID is missing, do not show this warning
+            warnings.append("ID must be a positive non-zero integer. ")
+        if ObjectOpRet.NAME_MISSING in retvals:
+            warnings.append("Name must not be missing. ")
+        if ObjectOpRet.TRIED_ADDING_EXISTING_BUYER in retvals:
+            warnings.append("Buyer ID already exists. ")
+        if ObjectOpRet.TRIED_EDITING_ID_TO_EXISTING_BUYER in retvals:
+            warnings.append("Buyer ID already exists. ")
+        if ObjectOpRet.STARTING_PRICE_INVALID in retvals:
+            warnings.append("Starting price must be a positive number with at most two decimal places. ")
+        if ObjectOpRet.ENDING_PRICE_INVALID in retvals:
+            warnings.append("Ending price must be a positive number with at most two decimal places. ")
+        if ObjectOpRet.DONATION_INVALID in retvals:
+            warnings.append("Donation must be a positive number with at most two decimal places. ")
+        if ObjectOpRet.BUYER_DOES_NOT_EXIST in retvals:
+            warnings.append("This buyer does not exist. ")
+        if warnings != []:
+            messagebox.showwarning("Warning", f"{'\n\n'.join(warnings)}")
+
     def commit_action(self):
         if self.mode == "ADD":
-            if self.next_id.get() == "":
-                return
-            if self.type != ObjectType.ITEM:
-                if self.name_var.get() == "":
-                    return
-                if self.type == ObjectType.BUYER and self.next_id.get() in self.controller.all_data.object_list[ObjectType.BUYER.value].keys():
-                    return
-            else:
-                if self.name_var.get() == "":
-                    return
+            # if self.next_id.get() == "":
+            #     return
+            # if self.type != ObjectType.ITEM:
+            #     if self.name_var.get() == "":
+            #         return
+            #     if self.type == ObjectType.BUYER and self.next_id.get() in self.controller.all_data.object_list[ObjectType.BUYER.value].keys():
+            #         return
+            # else:
+            #     if self.name_var.get() == "":
+            #         return
 
-            self.controller.all_data.create_object(self.type, id=self.next_id.get(), name=self.name_var.get(), address=self.address_var.get(), donor=self.donor_var.get().split(":")[0], starting_price=self.starting_price_var.get(), buyer=self.buyer_var.get().split(":")[0], ending_price=self.ending_price_var.get(), donation=self.donation_var.get())
+            retvals = self.controller.all_data.create_object(self.type, id=self.next_id.get(), name=self.name_var.get(), address=self.address_var.get(), donor=self.donor_var.get().split(":")[0], starting_price=self.starting_price_var.get(), buyer=self.buyer_var.get().split(":")[0], ending_price=self.ending_price_var.get(), donation=self.donation_var.get())
+            if retvals != [self.controller.all_data.ObjectOpRet.OP_SUCCESS]:
+                self.display_warnings(retvals)
+                return
             self.next_id.set(self.controller.all_data.next_ids[self.type.value])
             self.name_entry.delete(0, tk.END)
             if self.type != ObjectType.ITEM:
@@ -151,25 +178,33 @@ class ModObjectForm(tk.Frame):
                 self.ending_price_entry.delete(0, tk.END)
                 self.donation_entry.delete(0, tk.END)
         elif self.mode == "EDIT":
-            if self.treeview_params["id"] == "": # Handles trying to edit after successfully editing something
-                return
+            # if self.treeview_params["id"] == "": # Handles trying to edit after successfully editing something
+            #     return
 
-            if self.type != ObjectType.ITEM:
-                if self.name_var.get() == "":
-                    return
-            else:
-                if self.name_var.get() == "":
-                    return
+            # if self.type != ObjectType.ITEM:
+            #     if self.name_var.get() == "":
+            #         return
+            # else:
+            #     if self.name_var.get() == "":
+            #         return
 
             if self.type == ObjectType.BUYER:
                 if self.next_id.get() != self.treeview_params["id"] and self.next_id.get() in self.controller.all_data.object_list[self.type.value]:
-                    messagebox.showwarning("Warning", "This ID already has data. ")
+                    # messagebox.showwarning("Warning", "This ID already has data. ")
+                    self.display_warnings(retvals)
                     return
                 if self.next_id.get() != self.treeview_params["id"] and self.next_id.get() not in self.controller.all_data.object_list[self.type.value]:
-                    self.controller.all_data.create_object(self.type, id=self.next_id.get(), name=self.name_var.get(), address=self.address_var.get(), donor=self.donor_var.get().split(":")[0], starting_price=self.starting_price_var.get(), buyer=self.buyer_var.get().split(":")[0], ending_price=self.ending_price_var.get(), donation=self.donation_var.get())
+                    retvals = self.controller.all_data.create_object(self.type, id=self.next_id.get(), name=self.name_var.get(), address=self.address_var.get(), donor=self.donor_var.get().split(":")[0], starting_price=self.starting_price_var.get(), buyer=self.buyer_var.get().split(":")[0], ending_price=self.ending_price_var.get(), donation=self.donation_var.get())
+                    if retvals != [self.controller.all_data.ObjectOpRet.OP_SUCCESS]:
+                        self.display_warnings(retvals)
+                        return
+                    
                     self.controller.all_data.delete_object(self.type, self.treeview_params["id"])
 
-            self.controller.all_data.edit_object(self.type, id=self.next_id.get(), name=self.name_var.get(), address=self.address_var.get(), donor=self.donor_var.get().split(":")[0], starting_price=self.starting_price_var.get(), buyer=self.buyer_var.get().split(":")[0], ending_price=self.ending_price_var.get(), donation=self.donation_var.get())
+            retvals = self.controller.all_data.edit_object(self.type, id=self.next_id.get(), name=self.name_var.get(), address=self.address_var.get(), donor=self.donor_var.get().split(":")[0], starting_price=self.starting_price_var.get(), buyer=self.buyer_var.get().split(":")[0], ending_price=self.ending_price_var.get(), donation=self.donation_var.get())
+            if retvals != [self.controller.all_data.ObjectOpRet.OP_SUCCESS]:
+                self.display_warnings(retvals)
+                return
             self.treeview_params = self.empty_treeview_params()
             self.set_fields_on_request()
         else:
