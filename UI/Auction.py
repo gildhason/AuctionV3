@@ -3,6 +3,7 @@ from tkinter import ttk
 
 from globals import ObjectType
 from UI.ObjectsPage import ObjectsPage
+from UI.UnfinishedPage import UnfinishedPage
 from UI.registry import PAGES
 
 class NavigationManager:
@@ -34,12 +35,6 @@ class Auction(tk.Tk):
         self.frames = {}
         self.frameStack = []
 
-        for PageClass in PAGES:
-            # TODO: Because I can access show_frame and go_back through controller, investigate whether the parent parameter is necessary
-            page = PageClass(container, self, self.nav)
-            self.frames[PageClass.__name__] = page
-            page.grid(row = 0, column = 0, sticky = "nsew")
-
         page = ObjectsPage(container, self, ObjectType.DONOR, self.nav)
         self.frames["DonorsPage"] = page
         page.grid(row = 0, column = 0, sticky = "nsew")
@@ -51,6 +46,16 @@ class Auction(tk.Tk):
         page = ObjectsPage(container, self, ObjectType.BUYER, self.nav)
         self.frames["BuyersPage"] = page
         page.grid(row = 0, column = 0, sticky = "nsew")
+
+        page = UnfinishedPage(container, self, self.nav)
+        self.frames["UnfinishedPage"] = page
+        page.grid(row = 0, column = 0, sticky = "nsew")
+
+        for PageClass in PAGES:
+            # TODO: Because I can access show_frame and go_back through controller, investigate whether the parent parameter is necessary
+            page = PageClass(container, self, self.nav)
+            self.frames[PageClass.__name__] = page
+            page.grid(row = 0, column = 0, sticky = "nsew")
 
         self.show_frame("HomePage")
 

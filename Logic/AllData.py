@@ -106,7 +106,6 @@ class AllData:
 
     def create_object(self, entity_type, **kwargs):
         retvals = self.eval_all_params(entity_type, "CREATE", **kwargs)
-        print(f"Type: {entity_type} | {retvals}")
         if retvals:
             return retvals
 
